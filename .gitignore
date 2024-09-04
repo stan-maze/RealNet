@@ -1,0 +1,23 @@
+# Ignore data files
+data/BTAD/btad.zip
+data/DTD/dtd-r1.0.1.tar.gz
+data/LEISI_V2/leisi/*
+data/MVTec-AD/mvtec.zip
+data/MVTec-AD/sia_mvtec_anomaly_images.zip
+data/MVTec-AD/mvte/*
+
+# Ignore experiment checkpoints and visualizations
+experiments/LEISI_V2/classifier_checkpoints/*
+experiments/LEISI_V2/diffusion_checkpoints/*
+experiments/LEISI_V2/diffusion_vis/*
+experiments/LEISI_V2/realnet_checkpoints/*
+experiments/LEISI_V2/realnet_vis/*
+
+experiments/MVTec-AD/classifier_checkpoints/*
+experiments/MVTec-AD/diffusion_checkpoints/*
+experiments/MVTec-AD/diffusion_vis/*
+experiments/MVTec-AD/realnet_checkpoints/*
+experiments/MVTec-AD/realnet_vis/*
+
+# Ignore pretrain directory
+pretrain/*
