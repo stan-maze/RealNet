@@ -20,14 +20,14 @@ dataset:
     vflip: False
     rotate: False
     # use SDAS only
-    # anomaly_types:
-    #   normal: 0.5
-    #   sdas: 0.5
+    anomaly_types:
+      normal: 0.5
+      sdas: 0.5
 
     # use DTD only
-    anomaly_types:
-     normal: 0.5
-     dtd: 0.5
+    # anomaly_types:
+    #  normal: 0.5
+    #  dtd: 0.5
 
     # use both SDAS and DTD
     # anomaly_types:
@@ -39,8 +39,8 @@ dataset:
   input_size: [256,256]
   pixel_mean: [ 0.278, 0.278, 0.278 ]
   pixel_std: [ 0.238, 0.238, 0.238 ]
-  batch_size: 16
-  workers: 4
+  batch_size: 12
+  workers: 12
 
 
 structure:
@@ -106,7 +106,7 @@ net:
     prev: afs
     kwargs:
       num_res_blocks: 2
-      hide_channels_ratio: 0.5
+      hide_channels_ratio: 0.25
       channel_mult: [1,2,4]
       attention_mult: [2,4]
 

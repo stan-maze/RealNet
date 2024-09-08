@@ -22,7 +22,7 @@ unet:
   num_head_channels: 64
   use_scale_shift_norm: True
   resblock_updown: True
-  pertrain_path: experiments/LEISI_V2/diffusion_checkpoints/ckpt_10.pth.tar
+  pertrain_path: experiments/LEISI_V2/diffusion_checkpoints/ckpt_980.pth.tar
 
 
 classifier:
@@ -34,7 +34,7 @@ classifier:
   classifier_use_scale_shift_norm: True
   classifier_resblock_updown: True
   classifier_pool: attention
-  pertrain_path: experiments/LEISI_V2/classifier_checkpoints/ckpt_5.pth.tar
+  pertrain_path: experiments/LEISI_V2/classifier_checkpoints/pre_ckpt_5.pth.tar
 
 
 TestSampler:

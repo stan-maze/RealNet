@@ -1,0 +1,140 @@
+[2024-09-07 23:28:11,490][train_realnet.py][line: 122][    INFO] args: Namespace(class_name='LEISI_V2', config='experiments/LEISI_V2/realnet.yaml', dataset='LEISI_V2', local_rank=0)
+[2024-09-07 23:28:11,492][train_realnet.py][line: 123][    INFO] config: {'checkpoints_path': 'experiments/LEISI_V2/realnet_checkpoints/',
+ 'criterion': [{'kwargs': {'weight': 1.0},
+                'name': 'SegmentCrossEntropyLoss',
+                'type': 'SegmentCrossEntropyLoss'},
+               {'kwargs': {'weight': 1.0},
+                'name': 'FeatureMSELoss',
+                'type': 'FeatureMSELoss'}],
+ 'dataset': {'batch_size': 12,
+             'image_reader': {'kwargs': {'color_mode': 'RGB',
+                                         'image_dir': 'data/LEISI_V2/leisi/'},
+                              'type': 'opencv'},
+             'input_size': [256, 256],
+             'pixel_mean': [0.278, 0.278, 0.278],
+             'pixel_std': [0.238, 0.238, 0.238],
+             'test': {'meta_file': './data/LEISI_V2/samples/test_LEISI_V2.json'},
+             'train': {'anomaly_types': {'normal': 0.5, 'sdas': 0.5},
+                       'dtd_dir': 'data/DTD/images',
+                       'dtd_transparency_range': [0.2, 1.0],
+                       'hflip': False,
+                       'meta_file': 'data/LEISI_V2/samples/train_LEISI_V2.json',
+                       'min_perlin_scale': 0,
+                       'perlin_scale': 6,
+                       'rotate': False,
+                       'sdas_dir': 'data/LEISI_V2/sdas/LEISI_V2',
+                       'sdas_transparency_range': [0.5, 1.0],
+                       'vflip': False},
+             'type': 'LEISI_V2',
+             'workers': 12},
+ 'evaluator': {'key_metric': 'mean',
+               'metrics': {'auc': [{'kwargs': {'avgpool_size': [16, 16]},
+                                    'name': 'image'},
+                                   {'name': 'pixel'}]}},
+ 'exp_path': 'experiments/LEISI_V2',
+ 'log_path': 'experiments/LEISI_V2/realnet_log/',
+ 'net': [{'frozen': True,
+          'kwargs': {'backbone': 'wide_resnet50_2',
+                     'outlayers': ['layer1', 'layer2', 'layer3', 'layer4']},
+          'name': 'backbone',
+          'type': 'models.backbones.Backbone'},
+         {'frozen': True,
+          'kwargs': {'init_bsn': 64,
+                     'structure': [{'layers': [{'idx': 'layer1',
+                                                'planes': 256}],
+                                    'name': 'block1',
+                                    'stride': 4},
+                                   {'layers': [{'idx': 'layer2',
+                                                'planes': 512}],
+                                    'name': 'block2',
+                                    'stride': 8},
+                                   {'layers': [{'idx': 'layer3',
+                                                'planes': 512}],
+                                    'name': 'block3',
+                                    'stride': 16},
+                                   {'layers': [{'idx': 'layer4',
+                                                'planes': 256}],
+                                    'name': 'block4',
+                                    'stride': 32}]},
+          'name': 'afs',
+          'prev': 'backbone',
+          'type': 'models.afs.AFS'},
+         {'kwargs': {'attention_mult': [2, 4],
+                     'channel_mult': [1, 2, 4],
+                     'hide_channels_ratio': 0.25,
+                     'num_res_blocks': 2},
+          'name': 'recon',
+          'prev': 'afs',
+          'type': 'models.recon.ReconstructionLayer'},
+         {'kwargs': {'mode_numbers': [256, 256],
+                     'modes': ['max', 'mean'],
+                     'num_residual_layers': 2,
+                     'stop_grad': False},
+          'name': 'rrs',
+          'prev': 'recon',
+          'type': 'models.rrs.RRS'}],
+ 'random_seed': 100,
+ 'saver': {'checkpoints_dir': 'realnet_checkpoints/',
+           'log_dir': 'realnet_log/',
+           'vis_dir': 'realnet_vis/'},
+ 'structure': [{'layers': [{'idx': 'layer1', 'planes': 256}],
+                'name': 'block1',
+                'stride': 4},
+               {'layers': [{'idx': 'layer2', 'planes': 512}],
+                'name': 'block2',
+                'stride': 8},
+               {'layers': [{'idx': 'layer3', 'planes': 512}],
+                'name': 'block3',
+                'stride': 16},
+               {'layers': [{'idx': 'layer4', 'planes': 256}],
+                'name': 'block4',
+                'stride': 32}],
+ 'trainer': {'max_epoch': 1000,
+             'optimizer': {'kwargs': {'betas': [0.9, 0.999], 'lr': 0.0001},
+                           'type': 'Adam'},
+             'print_freq_step': 20,
+             'val_freq_epoch': 5},
+ 'version': 'v1.0.0'}
+[2024-09-07 23:28:11,492][train_realnet.py][line: 124][    INFO] class name is : LEISI_V2
+[2024-09-07 23:28:16,952][ misc_helper.py][line:  54][    INFO] ************* model summary *************
+[2024-09-07 23:28:16,953][ misc_helper.py][line:  56][    INFO] backbone: 66834240 param
+[2024-09-07 23:28:16,953][ misc_helper.py][line:  56][    INFO] afs: 1536 param
+[2024-09-07 23:28:16,957][ misc_helper.py][line:  56][    INFO] recon: 131118848 param
+[2024-09-07 23:28:16,957][ misc_helper.py][line:  56][    INFO] rrs: 5872662 param
+[2024-09-07 23:28:16,961][ misc_helper.py][line:  59][    INFO] ************* model summary *************
+[2024-09-07 23:28:16,961][ misc_helper.py][line:  60][    INFO] total: 203827286 param
+[2024-09-07 23:28:16,961][ misc_helper.py][line:  61][    INFO] frozen: 66835776 param
+[2024-09-07 23:28:16,961][ misc_helper.py][line:  62][    INFO] trainable: 136991510 param
+[2024-09-07 23:28:16,961][ misc_helper.py][line:  63][    INFO] ************* model summary *************
+[2024-09-07 23:30:11,719][train_realnet.py][line: 155][    INFO] layers: ['backbone', 'afs', 'recon', 'rrs']
+[2024-09-07 23:30:11,719][train_realnet.py][line: 156][    INFO] frozen layers: ['backbone', 'afs']
+[2024-09-07 23:30:11,719][train_realnet.py][line: 157][    INFO] active layers: ['recon', 'rrs']
+[2024-09-07 23:30:36,542][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [20/92000]	Loss 38.23611 (42.44607)	
+[2024-09-07 23:30:57,636][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [40/92000]	Loss 32.55118 (35.20865)	
+[2024-09-07 23:31:18,429][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [60/92000]	Loss 29.12027 (30.38024)	
+[2024-09-07 23:31:39,099][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [80/92000]	Loss 26.26860 (27.24639)	
+[2024-09-07 23:32:04,212][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [100/92000]	Loss 24.14578 (24.60025)	
+[2024-09-07 23:32:25,592][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [120/92000]	Loss 23.39981 (23.58966)	
+[2024-09-07 23:32:46,810][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [140/92000]	Loss 21.98141 (22.50931)	
+[2024-09-07 23:33:07,470][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [160/92000]	Loss 21.53743 (21.66222)	
+[2024-09-07 23:33:28,981][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [180/92000]	Loss 20.76789 (20.85458)	
+[2024-09-07 23:33:54,205][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [200/92000]	Loss 20.16013 (20.19499)	
+[2024-09-07 23:34:15,308][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [220/92000]	Loss 19.40126 (19.63460)	
+[2024-09-07 23:34:37,341][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [240/92000]	Loss 18.78334 (19.11762)	
+[2024-09-07 23:34:57,786][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [260/92000]	Loss 18.61411 (18.70229)	
+[2024-09-07 23:35:22,516][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [280/92000]	Loss 18.16428 (17.98247)	
+[2024-09-07 23:35:43,952][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [300/92000]	Loss 17.66510 (17.86727)	
+[2024-09-07 23:36:06,551][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [320/92000]	Loss 17.51423 (17.49878)	
+[2024-09-07 23:36:27,910][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [340/92000]	Loss 17.10772 (17.19620)	
+[2024-09-07 23:36:48,910][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [360/92000]	Loss 16.58897 (16.91174)	
+[2024-09-07 23:37:13,206][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [380/92000]	Loss 16.40092 (16.38903)	
+[2024-09-07 23:37:34,946][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [400/92000]	Loss 16.11181 (16.26036)	
+[2024-09-07 23:37:56,037][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [420/92000]	Loss 15.93163 (16.03017)	
+[2024-09-07 23:38:17,529][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [440/92000]	Loss 15.78666 (15.71875)	
+[2024-09-07 23:38:38,275][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [460/92000]	Loss 15.26665 (15.44791)	
+[2024-09-07 23:38:54,825][train_realnet.py][line: 320][    INFO]  * Loss 0.04372
+[2024-09-07 23:39:11,351][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel  |
+|:---------:|:--------:|:-------:|
+| LEISI_V2  | 0.534028 | 0.62381 |
+|   best    | 0.534028 | 0.62381 |

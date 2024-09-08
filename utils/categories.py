@@ -3,8 +3,9 @@
 Categories={
     # new added
     'LEISI_V2':[
-        "leisi_norm", # 0
-        # 'LEISI_V2'
+    # "leisi_norm", # 0
+    'LEISI_V2',
+    # 'leisi_bad'
     ],
     'VisA':[
         "candle",  # 0
@@ -55,9 +56,11 @@ Categories={
 
 CategoriesDict={
     'LEISI_V2':{
-        'leisi_norm':0,
-        # 'LEISI_V2': 0,
+    'LEISI_V2':0,
+    # 'leisi_norm': 0,
+    # 'leisi_bad': 1,
     },
+
     'VisA':{
         "candle":0,
         "capsules":1,

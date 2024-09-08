@@ -5,6 +5,9 @@ data/LEISI_V2/leisi/*
 data/MVTec-AD/mvtec.zip
 data/MVTec-AD/sia_mvtec_anomaly_images.zip
 data/MVTec-AD/mvte/*
+data/LEISI_V2/*
+data/DTD/*
+
 
 # Ignore experiment checkpoints and visualizations
 experiments/LEISI_V2/classifier_checkpoints/*

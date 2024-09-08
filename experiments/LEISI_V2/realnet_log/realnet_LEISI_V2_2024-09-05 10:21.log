@@ -1,0 +1,1283 @@
+[2024-09-05 10:21:00,057][train_realnet.py][line: 122][    INFO] args: Namespace(class_name='LEISI_V2', config='experiments/LEISI_V2/realnet.yaml', dataset='LEISI_V2', local_rank=0)
+[2024-09-05 10:21:00,061][train_realnet.py][line: 123][    INFO] config: {'checkpoints_path': 'experiments/LEISI_V2/realnet_checkpoints/',
+ 'criterion': [{'kwargs': {'weight': 1.0},
+                'name': 'SegmentCrossEntropyLoss',
+                'type': 'SegmentCrossEntropyLoss'},
+               {'kwargs': {'weight': 1.0},
+                'name': 'FeatureMSELoss',
+                'type': 'FeatureMSELoss'}],
+ 'dataset': {'batch_size': 12,
+             'image_reader': {'kwargs': {'color_mode': 'RGB',
+                                         'image_dir': 'data/LEISI_V2/leisi/'},
+                              'type': 'opencv'},
+             'input_size': [256, 256],
+             'pixel_mean': [0.278, 0.278, 0.278],
+             'pixel_std': [0.238, 0.238, 0.238],
+             'test': {'meta_file': './data/LEISI_V2/samples/test_LEISI_V2.json'},
+             'train': {'anomaly_types': {'dtd': 0.5, 'normal': 0.5},
+                       'dtd_dir': 'data/DTD/images',
+                       'dtd_transparency_range': [0.2, 1.0],
+                       'hflip': False,
+                       'meta_file': 'data/LEISI_V2/samples/train_LEISI_V2.json',
+                       'min_perlin_scale': 0,
+                       'perlin_scale': 6,
+                       'rotate': False,
+                       'sdas_dir': 'data/LEISI_V2/sdas/LEISI_V2',
+                       'sdas_transparency_range': [0.5, 1.0],
+                       'vflip': False},
+             'type': 'LEISI_V2',
+             'workers': 12},
+ 'evaluator': {'key_metric': 'mean',
+               'metrics': {'auc': [{'kwargs': {'avgpool_size': [16, 16]},
+                                    'name': 'image'},
+                                   {'name': 'pixel'}]}},
+ 'exp_path': 'experiments/LEISI_V2',
+ 'log_path': 'experiments/LEISI_V2/realnet_log/',
+ 'net': [{'frozen': True,
+          'kwargs': {'backbone': 'wide_resnet50_2',
+                     'outlayers': ['layer1', 'layer2', 'layer3', 'layer4']},
+          'name': 'backbone',
+          'type': 'models.backbones.Backbone'},
+         {'frozen': True,
+          'kwargs': {'init_bsn': 64,
+                     'structure': [{'layers': [{'idx': 'layer1',
+                                                'planes': 256}],
+                                    'name': 'block1',
+                                    'stride': 4},
+                                   {'layers': [{'idx': 'layer2',
+                                                'planes': 512}],
+                                    'name': 'block2',
+                                    'stride': 8},
+                                   {'layers': [{'idx': 'layer3',
+                                                'planes': 512}],
+                                    'name': 'block3',
+                                    'stride': 16},
+                                   {'layers': [{'idx': 'layer4',
+                                                'planes': 256}],
+                                    'name': 'block4',
+                                    'stride': 32}]},
+          'name': 'afs',
+          'prev': 'backbone',
+          'type': 'models.afs.AFS'},
+         {'kwargs': {'attention_mult': [2, 4],
+                     'channel_mult': [1, 2, 4],
+                     'hide_channels_ratio': 0.25,
+                     'num_res_blocks': 2},
+          'name': 'recon',
+          'prev': 'afs',
+          'type': 'models.recon.ReconstructionLayer'},
+         {'kwargs': {'mode_numbers': [256, 256],
+                     'modes': ['max', 'mean'],
+                     'num_residual_layers': 2,
+                     'stop_grad': False},
+          'name': 'rrs',
+          'prev': 'recon',
+          'type': 'models.rrs.RRS'}],
+ 'random_seed': 100,
+ 'saver': {'checkpoints_dir': 'realnet_checkpoints/',
+           'log_dir': 'realnet_log/',
+           'vis_dir': 'realnet_vis/'},
+ 'structure': [{'layers': [{'idx': 'layer1', 'planes': 256}],
+                'name': 'block1',
+                'stride': 4},
+               {'layers': [{'idx': 'layer2', 'planes': 512}],
+                'name': 'block2',
+                'stride': 8},
+               {'layers': [{'idx': 'layer3', 'planes': 512}],
+                'name': 'block3',
+                'stride': 16},
+               {'layers': [{'idx': 'layer4', 'planes': 256}],
+                'name': 'block4',
+                'stride': 32}],
+ 'trainer': {'max_epoch': 1000,
+             'optimizer': {'kwargs': {'betas': [0.9, 0.999], 'lr': 0.0001},
+                           'type': 'Adam'},
+             'print_freq_step': 20,
+             'val_freq_epoch': 5},
+ 'version': 'v1.0.0'}
+[2024-09-05 10:21:00,061][train_realnet.py][line: 124][    INFO] class name is : LEISI_V2
+[2024-09-05 10:21:05,331][ misc_helper.py][line:  54][    INFO] ************* model summary *************
+[2024-09-05 10:21:05,332][ misc_helper.py][line:  56][    INFO] backbone: 66834240 param
+[2024-09-05 10:21:05,332][ misc_helper.py][line:  56][    INFO] afs: 1536 param
+[2024-09-05 10:21:05,336][ misc_helper.py][line:  56][    INFO] recon: 131118848 param
+[2024-09-05 10:21:05,336][ misc_helper.py][line:  56][    INFO] rrs: 5872662 param
+[2024-09-05 10:21:05,339][ misc_helper.py][line:  59][    INFO] ************* model summary *************
+[2024-09-05 10:21:05,340][ misc_helper.py][line:  60][    INFO] total: 203827286 param
+[2024-09-05 10:21:05,340][ misc_helper.py][line:  61][    INFO] frozen: 66835776 param
+[2024-09-05 10:21:05,340][ misc_helper.py][line:  62][    INFO] trainable: 136991510 param
+[2024-09-05 10:21:05,340][ misc_helper.py][line:  63][    INFO] ************* model summary *************
+[2024-09-05 10:23:03,333][train_realnet.py][line: 155][    INFO] layers: ['backbone', 'afs', 'recon', 'rrs']
+[2024-09-05 10:23:03,334][train_realnet.py][line: 156][    INFO] frozen layers: ['backbone', 'afs']
+[2024-09-05 10:23:03,334][train_realnet.py][line: 157][    INFO] active layers: ['recon', 'rrs']
+[2024-09-05 10:23:28,698][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [20/92000]	Loss 37.76870 (41.93106)	
+[2024-09-05 10:23:49,814][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [40/92000]	Loss 32.11368 (34.76331)	
+[2024-09-05 10:24:10,183][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [60/92000]	Loss 28.68738 (29.94158)	
+[2024-09-05 10:24:31,161][train_realnet.py][line: 264][    INFO] Epoch: [1/1000]	Iter: [80/92000]	Loss 25.86691 (26.82132)	
+[2024-09-05 10:24:55,741][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [100/92000]	Loss 23.70005 (24.14986)	
+[2024-09-05 10:25:16,776][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [120/92000]	Loss 22.98655 (23.15190)	
+[2024-09-05 10:25:38,424][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [140/92000]	Loss 21.50202 (22.08983)	
+[2024-09-05 10:25:59,642][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [160/92000]	Loss 21.05220 (21.24260)	
+[2024-09-05 10:26:20,058][train_realnet.py][line: 264][    INFO] Epoch: [2/1000]	Iter: [180/92000]	Loss 20.33546 (20.45323)	
+[2024-09-05 10:26:45,926][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [200/92000]	Loss 19.78363 (19.81021)	
+[2024-09-05 10:27:07,055][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [220/92000]	Loss 19.10891 (19.27648)	
+[2024-09-05 10:27:29,021][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [240/92000]	Loss 18.40889 (18.75534)	
+[2024-09-05 10:27:49,746][train_realnet.py][line: 264][    INFO] Epoch: [3/1000]	Iter: [260/92000]	Loss 18.22194 (18.33692)	
+[2024-09-05 10:28:15,610][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [280/92000]	Loss 17.81157 (17.65183)	
+[2024-09-05 10:28:35,943][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [300/92000]	Loss 17.37338 (17.55971)	
+[2024-09-05 10:28:57,880][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [320/92000]	Loss 17.15923 (17.17425)	
+[2024-09-05 10:29:18,527][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [340/92000]	Loss 16.70729 (16.87359)	
+[2024-09-05 10:29:39,586][train_realnet.py][line: 264][    INFO] Epoch: [4/1000]	Iter: [360/92000]	Loss 16.20349 (16.59532)	
+[2024-09-05 10:30:04,949][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [380/92000]	Loss 16.17171 (16.15090)	
+[2024-09-05 10:30:25,885][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [400/92000]	Loss 15.76574 (15.95152)	
+[2024-09-05 10:30:46,450][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [420/92000]	Loss 15.72417 (15.73108)	
+[2024-09-05 10:31:07,383][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [440/92000]	Loss 15.52159 (15.47253)	
+[2024-09-05 10:31:28,496][train_realnet.py][line: 264][    INFO] Epoch: [5/1000]	Iter: [460/92000]	Loss 15.11438 (15.14311)	
+[2024-09-05 10:31:45,132][train_realnet.py][line: 320][    INFO]  * Loss 0.03914
+[2024-09-05 10:32:00,265][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel  |
+|:---------:|:--------:|:-------:|
+| LEISI_V2  | 0.578556 | 0.64014 |
+|   best    | 0.578556 | 0.64014 |
+[2024-09-05 10:32:30,867][train_realnet.py][line: 264][    INFO] Epoch: [6/1000]	Iter: [480/92000]	Loss 14.86268 (14.96095)	
+[2024-09-05 10:32:51,580][train_realnet.py][line: 264][    INFO] Epoch: [6/1000]	Iter: [500/92000]	Loss 14.51862 (14.68572)	
+[2024-09-05 10:33:12,522][train_realnet.py][line: 264][    INFO] Epoch: [6/1000]	Iter: [520/92000]	Loss 14.28675 (14.39585)	
+[2024-09-05 10:33:33,964][train_realnet.py][line: 264][    INFO] Epoch: [6/1000]	Iter: [540/92000]	Loss 14.01911 (14.21324)	
+[2024-09-05 10:34:00,273][train_realnet.py][line: 264][    INFO] Epoch: [7/1000]	Iter: [560/92000]	Loss 13.99188 (14.00027)	
+[2024-09-05 10:34:20,939][train_realnet.py][line: 264][    INFO] Epoch: [7/1000]	Iter: [580/92000]	Loss 14.04663 (13.82791)	
+[2024-09-05 10:34:41,830][train_realnet.py][line: 264][    INFO] Epoch: [7/1000]	Iter: [600/92000]	Loss 13.68093 (13.67164)	
+[2024-09-05 10:35:02,558][train_realnet.py][line: 264][    INFO] Epoch: [7/1000]	Iter: [620/92000]	Loss 13.53977 (13.45923)	
+[2024-09-05 10:35:23,847][train_realnet.py][line: 264][    INFO] Epoch: [7/1000]	Iter: [640/92000]	Loss 13.06196 (13.28895)	
+[2024-09-05 10:35:48,975][train_realnet.py][line: 264][    INFO] Epoch: [8/1000]	Iter: [660/92000]	Loss 12.87594 (13.10476)	
+[2024-09-05 10:36:10,658][train_realnet.py][line: 264][    INFO] Epoch: [8/1000]	Iter: [680/92000]	Loss 12.83049 (12.93765)	
+[2024-09-05 10:36:30,758][train_realnet.py][line: 264][    INFO] Epoch: [8/1000]	Iter: [700/92000]	Loss 12.63210 (12.82668)	
+[2024-09-05 10:36:52,026][train_realnet.py][line: 264][    INFO] Epoch: [8/1000]	Iter: [720/92000]	Loss 12.44720 (12.61309)	
+[2024-09-05 10:37:17,348][train_realnet.py][line: 264][    INFO] Epoch: [9/1000]	Iter: [740/92000]	Loss 12.54718 (12.41452)	
+[2024-09-05 10:37:37,705][train_realnet.py][line: 264][    INFO] Epoch: [9/1000]	Iter: [760/92000]	Loss 12.12434 (12.42520)	
+[2024-09-05 10:37:59,532][train_realnet.py][line: 264][    INFO] Epoch: [9/1000]	Iter: [780/92000]	Loss 12.03780 (12.18484)	
+[2024-09-05 10:38:20,801][train_realnet.py][line: 264][    INFO] Epoch: [9/1000]	Iter: [800/92000]	Loss 12.28648 (12.04930)	
+[2024-09-05 10:38:42,544][train_realnet.py][line: 264][    INFO] Epoch: [9/1000]	Iter: [820/92000]	Loss 11.39361 (11.94359)	
+[2024-09-05 10:39:07,762][train_realnet.py][line: 264][    INFO] Epoch: [10/1000]	Iter: [840/92000]	Loss 12.09139 (11.80516)	
+[2024-09-05 10:39:28,499][train_realnet.py][line: 264][    INFO] Epoch: [10/1000]	Iter: [860/92000]	Loss 11.71706 (11.73215)	
+[2024-09-05 10:39:49,611][train_realnet.py][line: 264][    INFO] Epoch: [10/1000]	Iter: [880/92000]	Loss 11.46630 (11.56708)	
+[2024-09-05 10:40:10,113][train_realnet.py][line: 264][    INFO] Epoch: [10/1000]	Iter: [900/92000]	Loss 11.49124 (11.52577)	
+[2024-09-05 10:40:31,740][train_realnet.py][line: 264][    INFO] Epoch: [10/1000]	Iter: [920/92000]	Loss 11.50142 (11.40393)	
+[2024-09-05 10:40:48,095][train_realnet.py][line: 320][    INFO]  * Loss 0.01507
+[2024-09-05 10:41:03,850][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.509944 | 0.634656 |
+|   best    | 0.578556 | 0.64014  |
+[2024-09-05 10:41:30,277][train_realnet.py][line: 264][    INFO] Epoch: [11/1000]	Iter: [940/92000]	Loss 11.42663 (11.28665)	
+[2024-09-05 10:41:51,066][train_realnet.py][line: 264][    INFO] Epoch: [11/1000]	Iter: [960/92000]	Loss 11.16821 (11.13540)	
+[2024-09-05 10:42:12,537][train_realnet.py][line: 264][    INFO] Epoch: [11/1000]	Iter: [980/92000]	Loss 10.86267 (11.01840)	
+[2024-09-05 10:42:33,238][train_realnet.py][line: 264][    INFO] Epoch: [11/1000]	Iter: [1000/92000]	Loss 11.04767 (10.98285)	
+[2024-09-05 10:42:58,311][train_realnet.py][line: 264][    INFO] Epoch: [12/1000]	Iter: [1020/92000]	Loss 11.05742 (10.86852)	
+[2024-09-05 10:43:19,858][train_realnet.py][line: 264][    INFO] Epoch: [12/1000]	Iter: [1040/92000]	Loss 11.07323 (10.79896)	
+[2024-09-05 10:43:40,347][train_realnet.py][line: 264][    INFO] Epoch: [12/1000]	Iter: [1060/92000]	Loss 10.55054 (10.68430)	
+[2024-09-05 10:44:01,274][train_realnet.py][line: 264][    INFO] Epoch: [12/1000]	Iter: [1080/92000]	Loss 10.58061 (10.53541)	
+[2024-09-05 10:44:22,563][train_realnet.py][line: 264][    INFO] Epoch: [12/1000]	Iter: [1100/92000]	Loss 10.55174 (10.50183)	
+[2024-09-05 10:44:47,727][train_realnet.py][line: 264][    INFO] Epoch: [13/1000]	Iter: [1120/92000]	Loss 10.46495 (10.42786)	
+[2024-09-05 10:45:08,681][train_realnet.py][line: 264][    INFO] Epoch: [13/1000]	Iter: [1140/92000]	Loss 9.95624 (10.35766)	
+[2024-09-05 10:45:29,749][train_realnet.py][line: 264][    INFO] Epoch: [13/1000]	Iter: [1160/92000]	Loss 10.10766 (10.22160)	
+[2024-09-05 10:45:50,918][train_realnet.py][line: 264][    INFO] Epoch: [13/1000]	Iter: [1180/92000]	Loss 9.77299 (10.11695)	
+[2024-09-05 10:46:17,413][train_realnet.py][line: 264][    INFO] Epoch: [14/1000]	Iter: [1200/92000]	Loss 10.00611 (10.05008)	
+[2024-09-05 10:46:38,119][train_realnet.py][line: 264][    INFO] Epoch: [14/1000]	Iter: [1220/92000]	Loss 10.18499 (10.06287)	
+[2024-09-05 10:46:59,247][train_realnet.py][line: 264][    INFO] Epoch: [14/1000]	Iter: [1240/92000]	Loss 9.85161 (9.96105)	
+[2024-09-05 10:47:20,371][train_realnet.py][line: 264][    INFO] Epoch: [14/1000]	Iter: [1260/92000]	Loss 9.81961 (9.86719)	
+[2024-09-05 10:47:41,200][train_realnet.py][line: 264][    INFO] Epoch: [14/1000]	Iter: [1280/92000]	Loss 9.78528 (9.77718)	
+[2024-09-05 10:48:06,957][train_realnet.py][line: 264][    INFO] Epoch: [15/1000]	Iter: [1300/92000]	Loss 9.72126 (9.73926)	
+[2024-09-05 10:48:28,063][train_realnet.py][line: 264][    INFO] Epoch: [15/1000]	Iter: [1320/92000]	Loss 9.53479 (9.61086)	
+[2024-09-05 10:48:49,724][train_realnet.py][line: 264][    INFO] Epoch: [15/1000]	Iter: [1340/92000]	Loss 9.46184 (9.53390)	
+[2024-09-05 10:49:10,653][train_realnet.py][line: 264][    INFO] Epoch: [15/1000]	Iter: [1360/92000]	Loss 9.61642 (9.47488)	
+[2024-09-05 10:49:30,966][train_realnet.py][line: 264][    INFO] Epoch: [15/1000]	Iter: [1380/92000]	Loss 9.50264 (9.40421)	
+[2024-09-05 10:49:47,467][train_realnet.py][line: 320][    INFO]  * Loss 0.02480
+[2024-09-05 10:50:02,781][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.51725  | 0.656872 |
+|   best    | 0.578556 | 0.64014  |
+[2024-09-05 10:50:28,648][train_realnet.py][line: 264][    INFO] Epoch: [16/1000]	Iter: [1400/92000]	Loss 9.19560 (9.43744)	
+[2024-09-05 10:50:49,747][train_realnet.py][line: 264][    INFO] Epoch: [16/1000]	Iter: [1420/92000]	Loss 9.12899 (9.25491)	
+[2024-09-05 10:51:11,482][train_realnet.py][line: 264][    INFO] Epoch: [16/1000]	Iter: [1440/92000]	Loss 9.07282 (9.18036)	
+[2024-09-05 10:51:32,022][train_realnet.py][line: 264][    INFO] Epoch: [16/1000]	Iter: [1460/92000]	Loss 9.07144 (9.11530)	
+[2024-09-05 10:51:56,945][train_realnet.py][line: 264][    INFO] Epoch: [17/1000]	Iter: [1480/92000]	Loss 9.07690 (9.00320)	
+[2024-09-05 10:52:17,749][train_realnet.py][line: 264][    INFO] Epoch: [17/1000]	Iter: [1500/92000]	Loss 8.68656 (9.02162)	
+[2024-09-05 10:52:40,018][train_realnet.py][line: 264][    INFO] Epoch: [17/1000]	Iter: [1520/92000]	Loss 8.76781 (8.98869)	
+[2024-09-05 10:53:01,576][train_realnet.py][line: 264][    INFO] Epoch: [17/1000]	Iter: [1540/92000]	Loss 8.86315 (8.98611)	
+[2024-09-05 10:53:22,683][train_realnet.py][line: 264][    INFO] Epoch: [17/1000]	Iter: [1560/92000]	Loss 8.87655 (8.78388)	
+[2024-09-05 10:53:47,998][train_realnet.py][line: 264][    INFO] Epoch: [18/1000]	Iter: [1580/92000]	Loss 8.69134 (8.76554)	
+[2024-09-05 10:54:08,575][train_realnet.py][line: 264][    INFO] Epoch: [18/1000]	Iter: [1600/92000]	Loss 8.71460 (8.67112)	
+[2024-09-05 10:54:29,344][train_realnet.py][line: 264][    INFO] Epoch: [18/1000]	Iter: [1620/92000]	Loss 8.99726 (8.69019)	
+[2024-09-05 10:54:50,387][train_realnet.py][line: 264][    INFO] Epoch: [18/1000]	Iter: [1640/92000]	Loss 8.54651 (8.63111)	
+[2024-09-05 10:55:16,325][train_realnet.py][line: 264][    INFO] Epoch: [19/1000]	Iter: [1660/92000]	Loss 8.49507 (8.57082)	
+[2024-09-05 10:55:37,438][train_realnet.py][line: 264][    INFO] Epoch: [19/1000]	Iter: [1680/92000]	Loss 8.45788 (8.47093)	
+[2024-09-05 10:55:58,508][train_realnet.py][line: 264][    INFO] Epoch: [19/1000]	Iter: [1700/92000]	Loss 8.57796 (8.49397)	
+[2024-09-05 10:56:20,297][train_realnet.py][line: 264][    INFO] Epoch: [19/1000]	Iter: [1720/92000]	Loss 8.49693 (8.44716)	
+[2024-09-05 10:56:41,471][train_realnet.py][line: 264][    INFO] Epoch: [19/1000]	Iter: [1740/92000]	Loss 8.09662 (8.32514)	
+[2024-09-05 10:57:06,320][train_realnet.py][line: 264][    INFO] Epoch: [20/1000]	Iter: [1760/92000]	Loss 8.44178 (8.25329)	
+[2024-09-05 10:57:28,036][train_realnet.py][line: 264][    INFO] Epoch: [20/1000]	Iter: [1780/92000]	Loss 8.38140 (8.23023)	
+[2024-09-05 10:57:49,412][train_realnet.py][line: 264][    INFO] Epoch: [20/1000]	Iter: [1800/92000]	Loss 8.20522 (8.24139)	
+[2024-09-05 10:58:10,326][train_realnet.py][line: 264][    INFO] Epoch: [20/1000]	Iter: [1820/92000]	Loss 8.03999 (8.14426)	
+[2024-09-05 10:58:31,263][train_realnet.py][line: 264][    INFO] Epoch: [20/1000]	Iter: [1840/92000]	Loss 8.16647 (8.08335)	
+[2024-09-05 10:58:47,641][train_realnet.py][line: 320][    INFO]  * Loss 0.05208
+[2024-09-05 10:59:03,405][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel  |
+|:---------:|:--------:|:-------:|
+| LEISI_V2  | 0.547639 | 0.6667  |
+|   best    | 0.578556 | 0.64014 |
+[2024-09-05 10:59:29,549][train_realnet.py][line: 264][    INFO] Epoch: [21/1000]	Iter: [1860/92000]	Loss 8.17208 (8.04462)	
+[2024-09-05 10:59:50,633][train_realnet.py][line: 264][    INFO] Epoch: [21/1000]	Iter: [1880/92000]	Loss 7.71248 (8.01774)	
+[2024-09-05 11:00:11,926][train_realnet.py][line: 264][    INFO] Epoch: [21/1000]	Iter: [1900/92000]	Loss 7.93081 (7.97652)	
+[2024-09-05 11:00:32,970][train_realnet.py][line: 264][    INFO] Epoch: [21/1000]	Iter: [1920/92000]	Loss 7.66674 (7.91480)	
+[2024-09-05 11:00:59,110][train_realnet.py][line: 264][    INFO] Epoch: [22/1000]	Iter: [1940/92000]	Loss 8.01510 (7.82811)	
+[2024-09-05 11:01:20,048][train_realnet.py][line: 264][    INFO] Epoch: [22/1000]	Iter: [1960/92000]	Loss 7.86255 (7.78295)	
+[2024-09-05 11:01:41,865][train_realnet.py][line: 264][    INFO] Epoch: [22/1000]	Iter: [1980/92000]	Loss 7.86187 (7.70211)	
+[2024-09-05 11:02:02,816][train_realnet.py][line: 264][    INFO] Epoch: [22/1000]	Iter: [2000/92000]	Loss 7.87630 (7.78485)	
+[2024-09-05 11:02:24,461][train_realnet.py][line: 264][    INFO] Epoch: [22/1000]	Iter: [2020/92000]	Loss 7.71967 (7.65628)	
+[2024-09-05 11:02:50,112][train_realnet.py][line: 264][    INFO] Epoch: [23/1000]	Iter: [2040/92000]	Loss 8.09938 (7.63361)	
+[2024-09-05 11:03:11,070][train_realnet.py][line: 264][    INFO] Epoch: [23/1000]	Iter: [2060/92000]	Loss 7.57959 (7.59427)	
+[2024-09-05 11:03:32,310][train_realnet.py][line: 264][    INFO] Epoch: [23/1000]	Iter: [2080/92000]	Loss 7.40404 (7.59166)	
+[2024-09-05 11:03:53,391][train_realnet.py][line: 264][    INFO] Epoch: [23/1000]	Iter: [2100/92000]	Loss 7.25910 (7.57496)	
+[2024-09-05 11:04:18,287][train_realnet.py][line: 264][    INFO] Epoch: [24/1000]	Iter: [2120/92000]	Loss 7.47234 (7.43531)	
+[2024-09-05 11:04:38,929][train_realnet.py][line: 264][    INFO] Epoch: [24/1000]	Iter: [2140/92000]	Loss 7.45896 (7.44839)	
+[2024-09-05 11:04:59,765][train_realnet.py][line: 264][    INFO] Epoch: [24/1000]	Iter: [2160/92000]	Loss 7.33018 (7.35887)	
+[2024-09-05 11:05:21,004][train_realnet.py][line: 264][    INFO] Epoch: [24/1000]	Iter: [2180/92000]	Loss 7.42575 (7.37322)	
+[2024-09-05 11:05:42,399][train_realnet.py][line: 264][    INFO] Epoch: [24/1000]	Iter: [2200/92000]	Loss 7.01831 (7.27259)	
+[2024-09-05 11:06:07,613][train_realnet.py][line: 264][    INFO] Epoch: [25/1000]	Iter: [2220/92000]	Loss 7.19017 (7.36080)	
+[2024-09-05 11:06:28,767][train_realnet.py][line: 264][    INFO] Epoch: [25/1000]	Iter: [2240/92000]	Loss 7.15525 (7.21598)	
+[2024-09-05 11:06:49,988][train_realnet.py][line: 264][    INFO] Epoch: [25/1000]	Iter: [2260/92000]	Loss 7.06796 (7.19036)	
+[2024-09-05 11:07:10,951][train_realnet.py][line: 264][    INFO] Epoch: [25/1000]	Iter: [2280/92000]	Loss 6.93846 (7.11760)	
+[2024-09-05 11:07:31,541][train_realnet.py][line: 264][    INFO] Epoch: [25/1000]	Iter: [2300/92000]	Loss 7.21975 (7.15009)	
+[2024-09-05 11:07:47,785][train_realnet.py][line: 320][    INFO]  * Loss 0.00935
+[2024-09-05 11:08:03,703][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.544139 | 0.702017 |
+|   best    | 0.544139 | 0.702017 |
+[2024-09-05 11:08:34,653][train_realnet.py][line: 264][    INFO] Epoch: [26/1000]	Iter: [2320/92000]	Loss 7.18982 (7.07870)	
+[2024-09-05 11:08:56,270][train_realnet.py][line: 264][    INFO] Epoch: [26/1000]	Iter: [2340/92000]	Loss 7.00674 (7.06770)	
+[2024-09-05 11:09:17,295][train_realnet.py][line: 264][    INFO] Epoch: [26/1000]	Iter: [2360/92000]	Loss 6.85695 (7.03538)	
+[2024-09-05 11:09:38,834][train_realnet.py][line: 264][    INFO] Epoch: [26/1000]	Iter: [2380/92000]	Loss 6.98789 (6.98901)	
+[2024-09-05 11:10:04,147][train_realnet.py][line: 264][    INFO] Epoch: [27/1000]	Iter: [2400/92000]	Loss 6.78972 (6.94138)	
+[2024-09-05 11:10:25,327][train_realnet.py][line: 264][    INFO] Epoch: [27/1000]	Iter: [2420/92000]	Loss 6.75537 (6.91632)	
+[2024-09-05 11:10:46,809][train_realnet.py][line: 264][    INFO] Epoch: [27/1000]	Iter: [2440/92000]	Loss 6.64738 (6.83922)	
+[2024-09-05 11:11:07,810][train_realnet.py][line: 264][    INFO] Epoch: [27/1000]	Iter: [2460/92000]	Loss 6.80211 (6.77921)	
+[2024-09-05 11:11:28,395][train_realnet.py][line: 264][    INFO] Epoch: [27/1000]	Iter: [2480/92000]	Loss 6.67660 (6.88787)	
+[2024-09-05 11:11:54,737][train_realnet.py][line: 264][    INFO] Epoch: [28/1000]	Iter: [2500/92000]	Loss 6.92628 (6.88536)	
+[2024-09-05 11:12:16,012][train_realnet.py][line: 264][    INFO] Epoch: [28/1000]	Iter: [2520/92000]	Loss 6.79091 (6.73336)	
+[2024-09-05 11:12:36,496][train_realnet.py][line: 264][    INFO] Epoch: [28/1000]	Iter: [2540/92000]	Loss 6.78896 (6.69465)	
+[2024-09-05 11:12:58,443][train_realnet.py][line: 264][    INFO] Epoch: [28/1000]	Iter: [2560/92000]	Loss 6.77405 (6.68979)	
+[2024-09-05 11:13:23,853][train_realnet.py][line: 264][    INFO] Epoch: [29/1000]	Iter: [2580/92000]	Loss 6.43575 (6.69674)	
+[2024-09-05 11:13:44,728][train_realnet.py][line: 264][    INFO] Epoch: [29/1000]	Iter: [2600/92000]	Loss 6.17960 (6.63805)	
+[2024-09-05 11:14:06,216][train_realnet.py][line: 264][    INFO] Epoch: [29/1000]	Iter: [2620/92000]	Loss 6.99170 (6.63204)	
+[2024-09-05 11:14:27,298][train_realnet.py][line: 264][    INFO] Epoch: [29/1000]	Iter: [2640/92000]	Loss 6.72553 (6.61327)	
+[2024-09-05 11:14:48,633][train_realnet.py][line: 264][    INFO] Epoch: [29/1000]	Iter: [2660/92000]	Loss 6.50974 (6.55639)	
+[2024-09-05 11:15:12,992][train_realnet.py][line: 264][    INFO] Epoch: [30/1000]	Iter: [2680/92000]	Loss 6.44032 (6.46558)	
+[2024-09-05 11:15:34,911][train_realnet.py][line: 264][    INFO] Epoch: [30/1000]	Iter: [2700/92000]	Loss 6.42106 (6.49343)	
+[2024-09-05 11:15:56,089][train_realnet.py][line: 264][    INFO] Epoch: [30/1000]	Iter: [2720/92000]	Loss 6.25787 (6.43349)	
+[2024-09-05 11:16:16,819][train_realnet.py][line: 264][    INFO] Epoch: [30/1000]	Iter: [2740/92000]	Loss 6.41950 (6.40164)	
+[2024-09-05 11:16:37,603][train_realnet.py][line: 264][    INFO] Epoch: [30/1000]	Iter: [2760/92000]	Loss 6.40649 (6.36971)	
+[2024-09-05 11:16:54,521][train_realnet.py][line: 320][    INFO]  * Loss 0.01402
+[2024-09-05 11:17:10,178][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.512944 | 0.681015 |
+|   best    | 0.544139 | 0.702017 |
+[2024-09-05 11:17:36,949][train_realnet.py][line: 264][    INFO] Epoch: [31/1000]	Iter: [2780/92000]	Loss 6.29952 (6.36422)	
+[2024-09-05 11:17:57,985][train_realnet.py][line: 264][    INFO] Epoch: [31/1000]	Iter: [2800/92000]	Loss 6.34193 (6.36885)	
+[2024-09-05 11:18:19,925][train_realnet.py][line: 264][    INFO] Epoch: [31/1000]	Iter: [2820/92000]	Loss 6.32518 (6.27678)	
+[2024-09-05 11:18:41,079][train_realnet.py][line: 264][    INFO] Epoch: [31/1000]	Iter: [2840/92000]	Loss 6.29275 (6.25240)	
+[2024-09-05 11:19:06,538][train_realnet.py][line: 264][    INFO] Epoch: [32/1000]	Iter: [2860/92000]	Loss 6.25247 (6.25387)	
+[2024-09-05 11:19:27,692][train_realnet.py][line: 264][    INFO] Epoch: [32/1000]	Iter: [2880/92000]	Loss 6.35401 (6.21981)	
+[2024-09-05 11:19:49,348][train_realnet.py][line: 264][    INFO] Epoch: [32/1000]	Iter: [2900/92000]	Loss 6.17193 (6.23057)	
+[2024-09-05 11:20:10,255][train_realnet.py][line: 264][    INFO] Epoch: [32/1000]	Iter: [2920/92000]	Loss 6.20411 (6.12362)	
+[2024-09-05 11:20:32,385][train_realnet.py][line: 264][    INFO] Epoch: [32/1000]	Iter: [2940/92000]	Loss 6.24759 (6.19172)	
+[2024-09-05 11:20:58,204][train_realnet.py][line: 264][    INFO] Epoch: [33/1000]	Iter: [2960/92000]	Loss 6.57076 (6.14720)	
+[2024-09-05 11:21:19,204][train_realnet.py][line: 264][    INFO] Epoch: [33/1000]	Iter: [2980/92000]	Loss 5.98122 (6.06172)	
+[2024-09-05 11:21:39,798][train_realnet.py][line: 264][    INFO] Epoch: [33/1000]	Iter: [3000/92000]	Loss 6.30707 (6.13286)	
+[2024-09-05 11:22:00,723][train_realnet.py][line: 264][    INFO] Epoch: [33/1000]	Iter: [3020/92000]	Loss 6.10067 (6.00607)	
+[2024-09-05 11:22:27,280][train_realnet.py][line: 264][    INFO] Epoch: [34/1000]	Iter: [3040/92000]	Loss 5.83731 (5.99563)	
+[2024-09-05 11:22:47,896][train_realnet.py][line: 264][    INFO] Epoch: [34/1000]	Iter: [3060/92000]	Loss 5.85136 (5.93522)	
+[2024-09-05 11:23:09,205][train_realnet.py][line: 264][    INFO] Epoch: [34/1000]	Iter: [3080/92000]	Loss 5.89736 (5.94803)	
+[2024-09-05 11:23:30,608][train_realnet.py][line: 264][    INFO] Epoch: [34/1000]	Iter: [3100/92000]	Loss 6.22771 (6.03829)	
+[2024-09-05 11:23:52,104][train_realnet.py][line: 264][    INFO] Epoch: [34/1000]	Iter: [3120/92000]	Loss 5.73497 (5.87954)	
+[2024-09-05 11:24:17,893][train_realnet.py][line: 264][    INFO] Epoch: [35/1000]	Iter: [3140/92000]	Loss 6.27171 (5.94737)	
+[2024-09-05 11:24:38,553][train_realnet.py][line: 264][    INFO] Epoch: [35/1000]	Iter: [3160/92000]	Loss 5.88443 (5.82483)	
+[2024-09-05 11:24:59,601][train_realnet.py][line: 264][    INFO] Epoch: [35/1000]	Iter: [3180/92000]	Loss 5.73884 (5.82643)	
+[2024-09-05 11:25:20,368][train_realnet.py][line: 264][    INFO] Epoch: [35/1000]	Iter: [3200/92000]	Loss 5.92158 (5.82635)	
+[2024-09-05 11:25:41,149][train_realnet.py][line: 264][    INFO] Epoch: [35/1000]	Iter: [3220/92000]	Loss 5.93428 (5.80455)	
+[2024-09-05 11:25:57,140][train_realnet.py][line: 320][    INFO]  * Loss 0.00649
+[2024-09-05 11:26:12,251][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel  |
+|:---------:|:--------:|:-------:|
+| LEISI_V2  | 0.580722 | 0.70169 |
+|   best    | 0.580722 | 0.70169 |
+[2024-09-05 11:26:43,198][train_realnet.py][line: 264][    INFO] Epoch: [36/1000]	Iter: [3240/92000]	Loss 6.22550 (5.80661)	
+[2024-09-05 11:27:04,473][train_realnet.py][line: 264][    INFO] Epoch: [36/1000]	Iter: [3260/92000]	Loss 5.75657 (5.77397)	
+[2024-09-05 11:27:25,337][train_realnet.py][line: 264][    INFO] Epoch: [36/1000]	Iter: [3280/92000]	Loss 5.66239 (5.67491)	
+[2024-09-05 11:27:46,057][train_realnet.py][line: 264][    INFO] Epoch: [36/1000]	Iter: [3300/92000]	Loss 5.40560 (5.71289)	
+[2024-09-05 11:28:11,149][train_realnet.py][line: 264][    INFO] Epoch: [37/1000]	Iter: [3320/92000]	Loss 5.62365 (5.60948)	
+[2024-09-05 11:28:31,703][train_realnet.py][line: 264][    INFO] Epoch: [37/1000]	Iter: [3340/92000]	Loss 5.68922 (5.66156)	
+[2024-09-05 11:28:53,889][train_realnet.py][line: 264][    INFO] Epoch: [37/1000]	Iter: [3360/92000]	Loss 5.78330 (5.66125)	
+[2024-09-05 11:29:15,232][train_realnet.py][line: 264][    INFO] Epoch: [37/1000]	Iter: [3380/92000]	Loss 5.57329 (5.62698)	
+[2024-09-05 11:29:36,198][train_realnet.py][line: 264][    INFO] Epoch: [37/1000]	Iter: [3400/92000]	Loss 5.40020 (5.63281)	
+[2024-09-05 11:30:01,164][train_realnet.py][line: 264][    INFO] Epoch: [38/1000]	Iter: [3420/92000]	Loss 5.44016 (5.58064)	
+[2024-09-05 11:30:22,186][train_realnet.py][line: 264][    INFO] Epoch: [38/1000]	Iter: [3440/92000]	Loss 5.43409 (5.50652)	
+[2024-09-05 11:30:44,223][train_realnet.py][line: 264][    INFO] Epoch: [38/1000]	Iter: [3460/92000]	Loss 5.63567 (5.55423)	
+[2024-09-05 11:31:05,332][train_realnet.py][line: 264][    INFO] Epoch: [38/1000]	Iter: [3480/92000]	Loss 5.35135 (5.48825)	
+[2024-09-05 11:31:30,783][train_realnet.py][line: 264][    INFO] Epoch: [39/1000]	Iter: [3500/92000]	Loss 5.54675 (5.39281)	
+[2024-09-05 11:31:51,061][train_realnet.py][line: 264][    INFO] Epoch: [39/1000]	Iter: [3520/92000]	Loss 5.34730 (5.44747)	
+[2024-09-05 11:32:11,911][train_realnet.py][line: 264][    INFO] Epoch: [39/1000]	Iter: [3540/92000]	Loss 5.32700 (5.44718)	
+[2024-09-05 11:32:33,304][train_realnet.py][line: 264][    INFO] Epoch: [39/1000]	Iter: [3560/92000]	Loss 5.60133 (5.38336)	
+[2024-09-05 11:32:53,990][train_realnet.py][line: 264][    INFO] Epoch: [39/1000]	Iter: [3580/92000]	Loss 5.34274 (5.45606)	
+[2024-09-05 11:33:21,091][train_realnet.py][line: 264][    INFO] Epoch: [40/1000]	Iter: [3600/92000]	Loss 5.28010 (5.39179)	
+[2024-09-05 11:33:41,600][train_realnet.py][line: 264][    INFO] Epoch: [40/1000]	Iter: [3620/92000]	Loss 5.51273 (5.45203)	
+[2024-09-05 11:34:02,198][train_realnet.py][line: 264][    INFO] Epoch: [40/1000]	Iter: [3640/92000]	Loss 5.69872 (5.40909)	
+[2024-09-05 11:34:23,197][train_realnet.py][line: 264][    INFO] Epoch: [40/1000]	Iter: [3660/92000]	Loss 5.43661 (5.34007)	
+[2024-09-05 11:34:44,178][train_realnet.py][line: 264][    INFO] Epoch: [40/1000]	Iter: [3680/92000]	Loss 5.22425 (5.34623)	
+[2024-09-05 11:35:00,594][train_realnet.py][line: 320][    INFO]  * Loss 0.01204
+[2024-09-05 11:35:16,321][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.594056 | 0.703494 |
+|   best    | 0.594056 | 0.703494 |
+[2024-09-05 11:35:47,040][train_realnet.py][line: 264][    INFO] Epoch: [41/1000]	Iter: [3700/92000]	Loss 5.43330 (5.37451)	
+[2024-09-05 11:36:07,853][train_realnet.py][line: 264][    INFO] Epoch: [41/1000]	Iter: [3720/92000]	Loss 5.20727 (5.31917)	
+[2024-09-05 11:36:29,390][train_realnet.py][line: 264][    INFO] Epoch: [41/1000]	Iter: [3740/92000]	Loss 5.22300 (5.28681)	
+[2024-09-05 11:36:50,263][train_realnet.py][line: 264][    INFO] Epoch: [41/1000]	Iter: [3760/92000]	Loss 5.28517 (5.29221)	
+[2024-09-05 11:37:16,346][train_realnet.py][line: 264][    INFO] Epoch: [42/1000]	Iter: [3780/92000]	Loss 5.22988 (5.19791)	
+[2024-09-05 11:37:37,847][train_realnet.py][line: 264][    INFO] Epoch: [42/1000]	Iter: [3800/92000]	Loss 5.17685 (5.25095)	
+[2024-09-05 11:37:58,820][train_realnet.py][line: 264][    INFO] Epoch: [42/1000]	Iter: [3820/92000]	Loss 5.21033 (5.25677)	
+[2024-09-05 11:38:19,773][train_realnet.py][line: 264][    INFO] Epoch: [42/1000]	Iter: [3840/92000]	Loss 5.30442 (5.24610)	
+[2024-09-05 11:38:40,381][train_realnet.py][line: 264][    INFO] Epoch: [42/1000]	Iter: [3860/92000]	Loss 5.07081 (5.15525)	
+[2024-09-05 11:39:06,116][train_realnet.py][line: 264][    INFO] Epoch: [43/1000]	Iter: [3880/92000]	Loss 4.91513 (5.22124)	
+[2024-09-05 11:39:27,872][train_realnet.py][line: 264][    INFO] Epoch: [43/1000]	Iter: [3900/92000]	Loss 5.25697 (5.18335)	
+[2024-09-05 11:39:49,186][train_realnet.py][line: 264][    INFO] Epoch: [43/1000]	Iter: [3920/92000]	Loss 5.54235 (5.17856)	
+[2024-09-05 11:40:10,672][train_realnet.py][line: 264][    INFO] Epoch: [43/1000]	Iter: [3940/92000]	Loss 5.01620 (5.06976)	
+[2024-09-05 11:40:36,675][train_realnet.py][line: 264][    INFO] Epoch: [44/1000]	Iter: [3960/92000]	Loss 5.34265 (5.30661)	
+[2024-09-05 11:40:57,261][train_realnet.py][line: 264][    INFO] Epoch: [44/1000]	Iter: [3980/92000]	Loss 4.89844 (5.13041)	
+[2024-09-05 11:41:18,145][train_realnet.py][line: 264][    INFO] Epoch: [44/1000]	Iter: [4000/92000]	Loss 5.05107 (5.10966)	
+[2024-09-05 11:41:39,232][train_realnet.py][line: 264][    INFO] Epoch: [44/1000]	Iter: [4020/92000]	Loss 5.09727 (5.04750)	
+[2024-09-05 11:42:00,301][train_realnet.py][line: 264][    INFO] Epoch: [44/1000]	Iter: [4040/92000]	Loss 4.94800 (5.00938)	
+[2024-09-05 11:42:25,677][train_realnet.py][line: 264][    INFO] Epoch: [45/1000]	Iter: [4060/92000]	Loss 5.09810 (5.05670)	
+[2024-09-05 11:42:47,201][train_realnet.py][line: 264][    INFO] Epoch: [45/1000]	Iter: [4080/92000]	Loss 4.79789 (5.04223)	
+[2024-09-05 11:43:08,887][train_realnet.py][line: 264][    INFO] Epoch: [45/1000]	Iter: [4100/92000]	Loss 5.05163 (5.02444)	
+[2024-09-05 11:43:31,500][train_realnet.py][line: 264][    INFO] Epoch: [45/1000]	Iter: [4120/92000]	Loss 4.70440 (5.00669)	
+[2024-09-05 11:43:51,842][train_realnet.py][line: 264][    INFO] Epoch: [45/1000]	Iter: [4140/92000]	Loss 5.40729 (5.04577)	
+[2024-09-05 11:44:08,292][train_realnet.py][line: 320][    INFO]  * Loss 0.00852
+[2024-09-05 11:44:23,639][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.572222 | 0.697072 |
+|   best    | 0.594056 | 0.703494 |
+[2024-09-05 11:44:49,973][train_realnet.py][line: 264][    INFO] Epoch: [46/1000]	Iter: [4160/92000]	Loss 5.31352 (5.00498)	
+[2024-09-05 11:45:11,246][train_realnet.py][line: 264][    INFO] Epoch: [46/1000]	Iter: [4180/92000]	Loss 4.87222 (4.97707)	
+[2024-09-05 11:45:33,010][train_realnet.py][line: 264][    INFO] Epoch: [46/1000]	Iter: [4200/92000]	Loss 5.29403 (4.93144)	
+[2024-09-05 11:45:54,082][train_realnet.py][line: 264][    INFO] Epoch: [46/1000]	Iter: [4220/92000]	Loss 4.88281 (4.90947)	
+[2024-09-05 11:46:20,084][train_realnet.py][line: 264][    INFO] Epoch: [47/1000]	Iter: [4240/92000]	Loss 5.04612 (4.88077)	
+[2024-09-05 11:46:40,875][train_realnet.py][line: 264][    INFO] Epoch: [47/1000]	Iter: [4260/92000]	Loss 5.07861 (4.90705)	
+[2024-09-05 11:47:02,434][train_realnet.py][line: 264][    INFO] Epoch: [47/1000]	Iter: [4280/92000]	Loss 5.06168 (4.90557)	
+[2024-09-05 11:47:24,410][train_realnet.py][line: 264][    INFO] Epoch: [47/1000]	Iter: [4300/92000]	Loss 4.86922 (4.87016)	
+[2024-09-05 11:47:45,418][train_realnet.py][line: 264][    INFO] Epoch: [47/1000]	Iter: [4320/92000]	Loss 4.75033 (4.90186)	
+[2024-09-05 11:48:10,930][train_realnet.py][line: 264][    INFO] Epoch: [48/1000]	Iter: [4340/92000]	Loss 4.78644 (4.84933)	
+[2024-09-05 11:48:32,894][train_realnet.py][line: 264][    INFO] Epoch: [48/1000]	Iter: [4360/92000]	Loss 4.77858 (4.83288)	
+[2024-09-05 11:48:54,183][train_realnet.py][line: 264][    INFO] Epoch: [48/1000]	Iter: [4380/92000]	Loss 4.84892 (4.85537)	
+[2024-09-05 11:49:14,765][train_realnet.py][line: 264][    INFO] Epoch: [48/1000]	Iter: [4400/92000]	Loss 4.71037 (4.85379)	
+[2024-09-05 11:49:39,857][train_realnet.py][line: 264][    INFO] Epoch: [49/1000]	Iter: [4420/92000]	Loss 4.80024 (4.80334)	
+[2024-09-05 11:50:01,042][train_realnet.py][line: 264][    INFO] Epoch: [49/1000]	Iter: [4440/92000]	Loss 4.79511 (4.81201)	
+[2024-09-05 11:50:22,213][train_realnet.py][line: 264][    INFO] Epoch: [49/1000]	Iter: [4460/92000]	Loss 4.76809 (4.78413)	
+[2024-09-05 11:50:42,870][train_realnet.py][line: 264][    INFO] Epoch: [49/1000]	Iter: [4480/92000]	Loss 4.55576 (4.86117)	
+[2024-09-05 11:51:04,255][train_realnet.py][line: 264][    INFO] Epoch: [49/1000]	Iter: [4500/92000]	Loss 4.57235 (4.78063)	
+[2024-09-05 11:51:30,658][train_realnet.py][line: 264][    INFO] Epoch: [50/1000]	Iter: [4520/92000]	Loss 4.66715 (4.77988)	
+[2024-09-05 11:51:51,330][train_realnet.py][line: 264][    INFO] Epoch: [50/1000]	Iter: [4540/92000]	Loss 4.59222 (4.68746)	
+[2024-09-05 11:52:12,302][train_realnet.py][line: 264][    INFO] Epoch: [50/1000]	Iter: [4560/92000]	Loss 4.63853 (4.66519)	
+[2024-09-05 11:52:33,383][train_realnet.py][line: 264][    INFO] Epoch: [50/1000]	Iter: [4580/92000]	Loss 4.62583 (4.74493)	
+[2024-09-05 11:52:53,998][train_realnet.py][line: 264][    INFO] Epoch: [50/1000]	Iter: [4600/92000]	Loss 4.62158 (4.69130)	
+[2024-09-05 11:53:10,759][train_realnet.py][line: 320][    INFO]  * Loss 0.00868
+[2024-09-05 11:53:26,001][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.600889 | 0.705594 |
+|   best    | 0.600889 | 0.705594 |
+[2024-09-05 11:53:57,188][train_realnet.py][line: 264][    INFO] Epoch: [51/1000]	Iter: [4620/92000]	Loss 4.51543 (4.69610)	
+[2024-09-05 11:54:19,110][train_realnet.py][line: 264][    INFO] Epoch: [51/1000]	Iter: [4640/92000]	Loss 4.66503 (4.67845)	
+[2024-09-05 11:54:40,584][train_realnet.py][line: 264][    INFO] Epoch: [51/1000]	Iter: [4660/92000]	Loss 4.78795 (4.70487)	
+[2024-09-05 11:55:01,168][train_realnet.py][line: 264][    INFO] Epoch: [51/1000]	Iter: [4680/92000]	Loss 4.55751 (4.61603)	
+[2024-09-05 11:55:27,067][train_realnet.py][line: 264][    INFO] Epoch: [52/1000]	Iter: [4700/92000]	Loss 4.62560 (4.67709)	
+[2024-09-05 11:55:48,023][train_realnet.py][line: 264][    INFO] Epoch: [52/1000]	Iter: [4720/92000]	Loss 4.66873 (4.68620)	
+[2024-09-05 11:56:09,275][train_realnet.py][line: 264][    INFO] Epoch: [52/1000]	Iter: [4740/92000]	Loss 4.59188 (4.70589)	
+[2024-09-05 11:56:30,554][train_realnet.py][line: 264][    INFO] Epoch: [52/1000]	Iter: [4760/92000]	Loss 4.70584 (4.60754)	
+[2024-09-05 11:56:51,390][train_realnet.py][line: 264][    INFO] Epoch: [52/1000]	Iter: [4780/92000]	Loss 4.57326 (4.56769)	
+[2024-09-05 11:57:16,585][train_realnet.py][line: 264][    INFO] Epoch: [53/1000]	Iter: [4800/92000]	Loss 4.98386 (4.64802)	
+[2024-09-05 11:57:38,598][train_realnet.py][line: 264][    INFO] Epoch: [53/1000]	Iter: [4820/92000]	Loss 4.64516 (4.62235)	
+[2024-09-05 11:57:59,434][train_realnet.py][line: 264][    INFO] Epoch: [53/1000]	Iter: [4840/92000]	Loss 4.67663 (4.58027)	
+[2024-09-05 11:58:20,400][train_realnet.py][line: 264][    INFO] Epoch: [53/1000]	Iter: [4860/92000]	Loss 4.45872 (4.57882)	
+[2024-09-05 11:58:45,784][train_realnet.py][line: 264][    INFO] Epoch: [54/1000]	Iter: [4880/92000]	Loss 4.35043 (4.53359)	
+[2024-09-05 11:59:06,534][train_realnet.py][line: 264][    INFO] Epoch: [54/1000]	Iter: [4900/92000]	Loss 4.39469 (4.56900)	
+[2024-09-05 11:59:27,889][train_realnet.py][line: 264][    INFO] Epoch: [54/1000]	Iter: [4920/92000]	Loss 4.42306 (4.53134)	
+[2024-09-05 11:59:49,362][train_realnet.py][line: 264][    INFO] Epoch: [54/1000]	Iter: [4940/92000]	Loss 4.89048 (4.56346)	
+[2024-09-05 12:00:09,938][train_realnet.py][line: 264][    INFO] Epoch: [54/1000]	Iter: [4960/92000]	Loss 4.45969 (4.52165)	
+[2024-09-05 12:00:35,698][train_realnet.py][line: 264][    INFO] Epoch: [55/1000]	Iter: [4980/92000]	Loss 4.27084 (4.50997)	
+[2024-09-05 12:00:57,490][train_realnet.py][line: 264][    INFO] Epoch: [55/1000]	Iter: [5000/92000]	Loss 4.98285 (4.53109)	
+[2024-09-05 12:01:18,499][train_realnet.py][line: 264][    INFO] Epoch: [55/1000]	Iter: [5020/92000]	Loss 4.26853 (4.49694)	
+[2024-09-05 12:01:39,720][train_realnet.py][line: 264][    INFO] Epoch: [55/1000]	Iter: [5040/92000]	Loss 4.42203 (4.56299)	
+[2024-09-05 12:02:00,753][train_realnet.py][line: 264][    INFO] Epoch: [55/1000]	Iter: [5060/92000]	Loss 4.11821 (4.48045)	
+[2024-09-05 12:02:17,478][train_realnet.py][line: 320][    INFO]  * Loss 0.00928
+[2024-09-05 12:02:32,807][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.597361 | 0.706266 |
+|   best    | 0.600889 | 0.705594 |
+[2024-09-05 12:02:57,623][train_realnet.py][line: 264][    INFO] Epoch: [56/1000]	Iter: [5080/92000]	Loss 4.42562 (4.51277)	
+[2024-09-05 12:03:18,820][train_realnet.py][line: 264][    INFO] Epoch: [56/1000]	Iter: [5100/92000]	Loss 4.34467 (4.44666)	
+[2024-09-05 12:03:39,830][train_realnet.py][line: 264][    INFO] Epoch: [56/1000]	Iter: [5120/92000]	Loss 4.52456 (4.41975)	
+[2024-09-05 12:04:00,596][train_realnet.py][line: 264][    INFO] Epoch: [56/1000]	Iter: [5140/92000]	Loss 4.51100 (4.36733)	
+[2024-09-05 12:04:26,415][train_realnet.py][line: 264][    INFO] Epoch: [57/1000]	Iter: [5160/92000]	Loss 4.26849 (4.36069)	
+[2024-09-05 12:04:47,139][train_realnet.py][line: 264][    INFO] Epoch: [57/1000]	Iter: [5180/92000]	Loss 3.99594 (4.39104)	
+[2024-09-05 12:05:08,270][train_realnet.py][line: 264][    INFO] Epoch: [57/1000]	Iter: [5200/92000]	Loss 4.31756 (4.37121)	
+[2024-09-05 12:05:28,734][train_realnet.py][line: 264][    INFO] Epoch: [57/1000]	Iter: [5220/92000]	Loss 4.22593 (4.45706)	
+[2024-09-05 12:05:50,378][train_realnet.py][line: 264][    INFO] Epoch: [57/1000]	Iter: [5240/92000]	Loss 4.32654 (4.35294)	
+[2024-09-05 12:06:16,060][train_realnet.py][line: 264][    INFO] Epoch: [58/1000]	Iter: [5260/92000]	Loss 4.59851 (4.45554)	
+[2024-09-05 12:06:37,388][train_realnet.py][line: 264][    INFO] Epoch: [58/1000]	Iter: [5280/92000]	Loss 4.05086 (4.37196)	
+[2024-09-05 12:06:59,067][train_realnet.py][line: 264][    INFO] Epoch: [58/1000]	Iter: [5300/92000]	Loss 4.66776 (4.42228)	
+[2024-09-05 12:07:20,706][train_realnet.py][line: 264][    INFO] Epoch: [58/1000]	Iter: [5320/92000]	Loss 4.39380 (4.35020)	
+[2024-09-05 12:07:46,433][train_realnet.py][line: 264][    INFO] Epoch: [59/1000]	Iter: [5340/92000]	Loss 4.22585 (4.34250)	
+[2024-09-05 12:08:07,012][train_realnet.py][line: 264][    INFO] Epoch: [59/1000]	Iter: [5360/92000]	Loss 4.59318 (4.37828)	
+[2024-09-05 12:08:28,540][train_realnet.py][line: 264][    INFO] Epoch: [59/1000]	Iter: [5380/92000]	Loss 4.27312 (4.34869)	
+[2024-09-05 12:08:50,031][train_realnet.py][line: 264][    INFO] Epoch: [59/1000]	Iter: [5400/92000]	Loss 4.58667 (4.32258)	
+[2024-09-05 12:09:11,848][train_realnet.py][line: 264][    INFO] Epoch: [59/1000]	Iter: [5420/92000]	Loss 4.16746 (4.35651)	
+[2024-09-05 12:09:38,429][train_realnet.py][line: 264][    INFO] Epoch: [60/1000]	Iter: [5440/92000]	Loss 4.18752 (4.32198)	
+[2024-09-05 12:09:59,294][train_realnet.py][line: 264][    INFO] Epoch: [60/1000]	Iter: [5460/92000]	Loss 4.05908 (4.32329)	
+[2024-09-05 12:10:21,293][train_realnet.py][line: 264][    INFO] Epoch: [60/1000]	Iter: [5480/92000]	Loss 4.09173 (4.27478)	
+[2024-09-05 12:10:41,832][train_realnet.py][line: 264][    INFO] Epoch: [60/1000]	Iter: [5500/92000]	Loss 4.14066 (4.35609)	
+[2024-09-05 12:11:03,504][train_realnet.py][line: 264][    INFO] Epoch: [60/1000]	Iter: [5520/92000]	Loss 4.11287 (4.24022)	
+[2024-09-05 12:11:19,771][train_realnet.py][line: 320][    INFO]  * Loss 0.00870
+[2024-09-05 12:11:35,153][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.613889 | 0.703552 |
+|   best    | 0.613889 | 0.703552 |
+[2024-09-05 12:12:07,366][train_realnet.py][line: 264][    INFO] Epoch: [61/1000]	Iter: [5540/92000]	Loss 3.98263 (4.30508)	
+[2024-09-05 12:12:27,972][train_realnet.py][line: 264][    INFO] Epoch: [61/1000]	Iter: [5560/92000]	Loss 4.16070 (4.25873)	
+[2024-09-05 12:12:49,325][train_realnet.py][line: 264][    INFO] Epoch: [61/1000]	Iter: [5580/92000]	Loss 4.31048 (4.22512)	
+[2024-09-05 12:13:10,591][train_realnet.py][line: 264][    INFO] Epoch: [61/1000]	Iter: [5600/92000]	Loss 4.28752 (4.27140)	
+[2024-09-05 12:13:36,817][train_realnet.py][line: 264][    INFO] Epoch: [62/1000]	Iter: [5620/92000]	Loss 4.21089 (4.32082)	
+[2024-09-05 12:13:57,638][train_realnet.py][line: 264][    INFO] Epoch: [62/1000]	Iter: [5640/92000]	Loss 4.30819 (4.25081)	
+[2024-09-05 12:14:18,445][train_realnet.py][line: 264][    INFO] Epoch: [62/1000]	Iter: [5660/92000]	Loss 4.30905 (4.22464)	
+[2024-09-05 12:14:39,445][train_realnet.py][line: 264][    INFO] Epoch: [62/1000]	Iter: [5680/92000]	Loss 4.22069 (4.22839)	
+[2024-09-05 12:15:01,143][train_realnet.py][line: 264][    INFO] Epoch: [62/1000]	Iter: [5700/92000]	Loss 4.38792 (4.24442)	
+[2024-09-05 12:15:26,702][train_realnet.py][line: 264][    INFO] Epoch: [63/1000]	Iter: [5720/92000]	Loss 4.20993 (4.13900)	
+[2024-09-05 12:15:48,252][train_realnet.py][line: 264][    INFO] Epoch: [63/1000]	Iter: [5740/92000]	Loss 4.45606 (4.17316)	
+[2024-09-05 12:16:10,440][train_realnet.py][line: 264][    INFO] Epoch: [63/1000]	Iter: [5760/92000]	Loss 4.26607 (4.21805)	
+[2024-09-05 12:16:31,791][train_realnet.py][line: 264][    INFO] Epoch: [63/1000]	Iter: [5780/92000]	Loss 4.20678 (4.26007)	
+[2024-09-05 12:16:57,094][train_realnet.py][line: 264][    INFO] Epoch: [64/1000]	Iter: [5800/92000]	Loss 3.98874 (4.19593)	
+[2024-09-05 12:17:17,659][train_realnet.py][line: 264][    INFO] Epoch: [64/1000]	Iter: [5820/92000]	Loss 4.30576 (4.24170)	
+[2024-09-05 12:17:38,173][train_realnet.py][line: 264][    INFO] Epoch: [64/1000]	Iter: [5840/92000]	Loss 4.04530 (4.20766)	
+[2024-09-05 12:17:59,734][train_realnet.py][line: 264][    INFO] Epoch: [64/1000]	Iter: [5860/92000]	Loss 4.45350 (4.18721)	
+[2024-09-05 12:18:20,157][train_realnet.py][line: 264][    INFO] Epoch: [64/1000]	Iter: [5880/92000]	Loss 4.29324 (4.18221)	
+[2024-09-05 12:18:46,274][train_realnet.py][line: 264][    INFO] Epoch: [65/1000]	Iter: [5900/92000]	Loss 4.13543 (4.12979)	
+[2024-09-05 12:19:07,099][train_realnet.py][line: 264][    INFO] Epoch: [65/1000]	Iter: [5920/92000]	Loss 4.31312 (4.18500)	
+[2024-09-05 12:19:29,010][train_realnet.py][line: 264][    INFO] Epoch: [65/1000]	Iter: [5940/92000]	Loss 4.03890 (4.20267)	
+[2024-09-05 12:19:50,718][train_realnet.py][line: 264][    INFO] Epoch: [65/1000]	Iter: [5960/92000]	Loss 3.92188 (4.12321)	
+[2024-09-05 12:20:12,320][train_realnet.py][line: 264][    INFO] Epoch: [65/1000]	Iter: [5980/92000]	Loss 4.34200 (4.08003)	
+[2024-09-05 12:20:28,721][train_realnet.py][line: 320][    INFO]  * Loss 0.00961
+[2024-09-05 12:20:44,167][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.580944 | 0.694093 |
+|   best    | 0.613889 | 0.703552 |
+[2024-09-05 12:21:09,509][train_realnet.py][line: 264][    INFO] Epoch: [66/1000]	Iter: [6000/92000]	Loss 4.21486 (4.13341)	
+[2024-09-05 12:21:30,931][train_realnet.py][line: 264][    INFO] Epoch: [66/1000]	Iter: [6020/92000]	Loss 3.82770 (4.10255)	
+[2024-09-05 12:21:52,234][train_realnet.py][line: 264][    INFO] Epoch: [66/1000]	Iter: [6040/92000]	Loss 3.99521 (4.22567)	
+[2024-09-05 12:22:14,337][train_realnet.py][line: 264][    INFO] Epoch: [66/1000]	Iter: [6060/92000]	Loss 4.01944 (4.13227)	
+[2024-09-05 12:22:40,785][train_realnet.py][line: 264][    INFO] Epoch: [67/1000]	Iter: [6080/92000]	Loss 4.10952 (4.19560)	
+[2024-09-05 12:23:01,747][train_realnet.py][line: 264][    INFO] Epoch: [67/1000]	Iter: [6100/92000]	Loss 3.91652 (4.04241)	
+[2024-09-05 12:23:23,148][train_realnet.py][line: 264][    INFO] Epoch: [67/1000]	Iter: [6120/92000]	Loss 3.95159 (4.07860)	
+[2024-09-05 12:23:44,668][train_realnet.py][line: 264][    INFO] Epoch: [67/1000]	Iter: [6140/92000]	Loss 4.11211 (4.14227)	
+[2024-09-05 12:24:05,522][train_realnet.py][line: 264][    INFO] Epoch: [67/1000]	Iter: [6160/92000]	Loss 3.79086 (4.12781)	
+[2024-09-05 12:24:31,356][train_realnet.py][line: 264][    INFO] Epoch: [68/1000]	Iter: [6180/92000]	Loss 4.28386 (4.13249)	
+[2024-09-05 12:24:53,464][train_realnet.py][line: 264][    INFO] Epoch: [68/1000]	Iter: [6200/92000]	Loss 4.14249 (4.06842)	
+[2024-09-05 12:25:15,076][train_realnet.py][line: 264][    INFO] Epoch: [68/1000]	Iter: [6220/92000]	Loss 4.05829 (4.03266)	
+[2024-09-05 12:25:35,928][train_realnet.py][line: 264][    INFO] Epoch: [68/1000]	Iter: [6240/92000]	Loss 4.12260 (4.01244)	
+[2024-09-05 12:26:02,411][train_realnet.py][line: 264][    INFO] Epoch: [69/1000]	Iter: [6260/92000]	Loss 4.21988 (4.20547)	
+[2024-09-05 12:26:23,585][train_realnet.py][line: 264][    INFO] Epoch: [69/1000]	Iter: [6280/92000]	Loss 3.99212 (4.06290)	
+[2024-09-05 12:26:44,306][train_realnet.py][line: 264][    INFO] Epoch: [69/1000]	Iter: [6300/92000]	Loss 4.07354 (4.06999)	
+[2024-09-05 12:27:06,385][train_realnet.py][line: 264][    INFO] Epoch: [69/1000]	Iter: [6320/92000]	Loss 3.98881 (4.02370)	
+[2024-09-05 12:27:27,474][train_realnet.py][line: 264][    INFO] Epoch: [69/1000]	Iter: [6340/92000]	Loss 4.05420 (4.01449)	
+[2024-09-05 12:27:52,465][train_realnet.py][line: 264][    INFO] Epoch: [70/1000]	Iter: [6360/92000]	Loss 3.91962 (3.99556)	
+[2024-09-05 12:28:14,062][train_realnet.py][line: 264][    INFO] Epoch: [70/1000]	Iter: [6380/92000]	Loss 3.77253 (3.98393)	
+[2024-09-05 12:28:35,576][train_realnet.py][line: 264][    INFO] Epoch: [70/1000]	Iter: [6400/92000]	Loss 4.30149 (4.03444)	
+[2024-09-05 12:28:56,833][train_realnet.py][line: 264][    INFO] Epoch: [70/1000]	Iter: [6420/92000]	Loss 4.07196 (4.01464)	
+[2024-09-05 12:29:17,348][train_realnet.py][line: 264][    INFO] Epoch: [70/1000]	Iter: [6440/92000]	Loss 3.85368 (4.05542)	
+[2024-09-05 12:29:33,759][train_realnet.py][line: 320][    INFO]  * Loss 0.00850
+[2024-09-05 12:29:48,451][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.611917 | 0.70065  |
+|   best    | 0.613889 | 0.703552 |
+[2024-09-05 12:30:14,545][train_realnet.py][line: 264][    INFO] Epoch: [71/1000]	Iter: [6460/92000]	Loss 3.82318 (3.96169)	
+[2024-09-05 12:30:36,977][train_realnet.py][line: 264][    INFO] Epoch: [71/1000]	Iter: [6480/92000]	Loss 3.93239 (4.02429)	
+[2024-09-05 12:30:58,257][train_realnet.py][line: 264][    INFO] Epoch: [71/1000]	Iter: [6500/92000]	Loss 4.02604 (3.98383)	
+[2024-09-05 12:31:19,772][train_realnet.py][line: 264][    INFO] Epoch: [71/1000]	Iter: [6520/92000]	Loss 3.90449 (3.97483)	
+[2024-09-05 12:31:46,362][train_realnet.py][line: 264][    INFO] Epoch: [72/1000]	Iter: [6540/92000]	Loss 4.23674 (4.03995)	
+[2024-09-05 12:32:08,169][train_realnet.py][line: 264][    INFO] Epoch: [72/1000]	Iter: [6560/92000]	Loss 4.00135 (3.92472)	
+[2024-09-05 12:32:28,901][train_realnet.py][line: 264][    INFO] Epoch: [72/1000]	Iter: [6580/92000]	Loss 4.14883 (3.97392)	
+[2024-09-05 12:32:50,697][train_realnet.py][line: 264][    INFO] Epoch: [72/1000]	Iter: [6600/92000]	Loss 3.81133 (3.93797)	
+[2024-09-05 12:33:10,796][train_realnet.py][line: 264][    INFO] Epoch: [72/1000]	Iter: [6620/92000]	Loss 4.03860 (3.96388)	
+[2024-09-05 12:33:36,830][train_realnet.py][line: 264][    INFO] Epoch: [73/1000]	Iter: [6640/92000]	Loss 3.73859 (4.04287)	
+[2024-09-05 12:33:57,872][train_realnet.py][line: 264][    INFO] Epoch: [73/1000]	Iter: [6660/92000]	Loss 3.87506 (3.92630)	
+[2024-09-05 12:34:18,348][train_realnet.py][line: 264][    INFO] Epoch: [73/1000]	Iter: [6680/92000]	Loss 3.98071 (3.93789)	
+[2024-09-05 12:34:39,812][train_realnet.py][line: 264][    INFO] Epoch: [73/1000]	Iter: [6700/92000]	Loss 4.07919 (3.97019)	
+[2024-09-05 12:35:05,835][train_realnet.py][line: 264][    INFO] Epoch: [74/1000]	Iter: [6720/92000]	Loss 4.19708 (4.05770)	
+[2024-09-05 12:35:27,251][train_realnet.py][line: 264][    INFO] Epoch: [74/1000]	Iter: [6740/92000]	Loss 3.68924 (3.99303)	
+[2024-09-05 12:35:48,409][train_realnet.py][line: 264][    INFO] Epoch: [74/1000]	Iter: [6760/92000]	Loss 3.81782 (3.95254)	
+[2024-09-05 12:36:10,772][train_realnet.py][line: 264][    INFO] Epoch: [74/1000]	Iter: [6780/92000]	Loss 3.87074 (3.85648)	
+[2024-09-05 12:36:31,410][train_realnet.py][line: 264][    INFO] Epoch: [74/1000]	Iter: [6800/92000]	Loss 4.13080 (3.88416)	
+[2024-09-05 12:36:56,729][train_realnet.py][line: 264][    INFO] Epoch: [75/1000]	Iter: [6820/92000]	Loss 3.90452 (3.97772)	
+[2024-09-05 12:37:18,230][train_realnet.py][line: 264][    INFO] Epoch: [75/1000]	Iter: [6840/92000]	Loss 3.86988 (3.91797)	
+[2024-09-05 12:37:39,317][train_realnet.py][line: 264][    INFO] Epoch: [75/1000]	Iter: [6860/92000]	Loss 3.98104 (3.92746)	
+[2024-09-05 12:38:00,729][train_realnet.py][line: 264][    INFO] Epoch: [75/1000]	Iter: [6880/92000]	Loss 3.65718 (3.94793)	
+[2024-09-05 12:38:21,844][train_realnet.py][line: 264][    INFO] Epoch: [75/1000]	Iter: [6900/92000]	Loss 4.00557 (3.92837)	
+[2024-09-05 12:38:38,621][train_realnet.py][line: 320][    INFO]  * Loss 0.00679
+[2024-09-05 12:38:53,267][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.581722 | 0.692543 |
+|   best    | 0.613889 | 0.703552 |
+[2024-09-05 12:39:18,538][train_realnet.py][line: 264][    INFO] Epoch: [76/1000]	Iter: [6920/92000]	Loss 4.04021 (3.86921)	
+[2024-09-05 12:39:39,950][train_realnet.py][line: 264][    INFO] Epoch: [76/1000]	Iter: [6940/92000]	Loss 3.89881 (3.86904)	
+[2024-09-05 12:40:00,690][train_realnet.py][line: 264][    INFO] Epoch: [76/1000]	Iter: [6960/92000]	Loss 4.05992 (3.92797)	
+[2024-09-05 12:40:22,234][train_realnet.py][line: 264][    INFO] Epoch: [76/1000]	Iter: [6980/92000]	Loss 3.97543 (3.83500)	
+[2024-09-05 12:40:48,296][train_realnet.py][line: 264][    INFO] Epoch: [77/1000]	Iter: [7000/92000]	Loss 3.85746 (3.89985)	
+[2024-09-05 12:41:09,423][train_realnet.py][line: 264][    INFO] Epoch: [77/1000]	Iter: [7020/92000]	Loss 3.90202 (3.91349)	
+[2024-09-05 12:41:30,846][train_realnet.py][line: 264][    INFO] Epoch: [77/1000]	Iter: [7040/92000]	Loss 3.83409 (3.87854)	
+[2024-09-05 12:41:52,465][train_realnet.py][line: 264][    INFO] Epoch: [77/1000]	Iter: [7060/92000]	Loss 3.46380 (3.87112)	
+[2024-09-05 12:42:13,831][train_realnet.py][line: 264][    INFO] Epoch: [77/1000]	Iter: [7080/92000]	Loss 4.03688 (3.89423)	
+[2024-09-05 12:42:39,863][train_realnet.py][line: 264][    INFO] Epoch: [78/1000]	Iter: [7100/92000]	Loss 3.75473 (3.87340)	
+[2024-09-05 12:43:02,417][train_realnet.py][line: 264][    INFO] Epoch: [78/1000]	Iter: [7120/92000]	Loss 3.69862 (3.80331)	
+[2024-09-05 12:43:24,543][train_realnet.py][line: 264][    INFO] Epoch: [78/1000]	Iter: [7140/92000]	Loss 3.66690 (3.85066)	
+[2024-09-05 12:43:46,328][train_realnet.py][line: 264][    INFO] Epoch: [78/1000]	Iter: [7160/92000]	Loss 3.64109 (3.84262)	
+[2024-09-05 12:44:11,779][train_realnet.py][line: 264][    INFO] Epoch: [79/1000]	Iter: [7180/92000]	Loss 3.83642 (3.65400)	
+[2024-09-05 12:44:32,911][train_realnet.py][line: 264][    INFO] Epoch: [79/1000]	Iter: [7200/92000]	Loss 3.89325 (3.86281)	
+[2024-09-05 12:44:54,453][train_realnet.py][line: 264][    INFO] Epoch: [79/1000]	Iter: [7220/92000]	Loss 3.77147 (3.74893)	
+[2024-09-05 12:45:15,991][train_realnet.py][line: 264][    INFO] Epoch: [79/1000]	Iter: [7240/92000]	Loss 4.01434 (3.86484)	
+[2024-09-05 12:45:37,504][train_realnet.py][line: 264][    INFO] Epoch: [79/1000]	Iter: [7260/92000]	Loss 3.87327 (3.80519)	
+[2024-09-05 12:46:03,324][train_realnet.py][line: 264][    INFO] Epoch: [80/1000]	Iter: [7280/92000]	Loss 3.79091 (3.84050)	
+[2024-09-05 12:46:24,859][train_realnet.py][line: 264][    INFO] Epoch: [80/1000]	Iter: [7300/92000]	Loss 3.78235 (3.79621)	
+[2024-09-05 12:46:46,828][train_realnet.py][line: 264][    INFO] Epoch: [80/1000]	Iter: [7320/92000]	Loss 3.99296 (3.77485)	
+[2024-09-05 12:47:08,370][train_realnet.py][line: 264][    INFO] Epoch: [80/1000]	Iter: [7340/92000]	Loss 3.67512 (3.84553)	
+[2024-09-05 12:47:29,369][train_realnet.py][line: 264][    INFO] Epoch: [80/1000]	Iter: [7360/92000]	Loss 3.97496 (3.79356)	
+[2024-09-05 12:47:46,017][train_realnet.py][line: 320][    INFO]  * Loss 0.00566
+[2024-09-05 12:48:00,671][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.602917 | 0.709869 |
+|   best    | 0.613889 | 0.703552 |
+[2024-09-05 12:48:26,483][train_realnet.py][line: 264][    INFO] Epoch: [81/1000]	Iter: [7380/92000]	Loss 3.70337 (3.75726)	
+[2024-09-05 12:48:47,940][train_realnet.py][line: 264][    INFO] Epoch: [81/1000]	Iter: [7400/92000]	Loss 4.09881 (3.78572)	
+[2024-09-05 12:49:09,820][train_realnet.py][line: 264][    INFO] Epoch: [81/1000]	Iter: [7420/92000]	Loss 3.81020 (3.77728)	
+[2024-09-05 12:49:30,870][train_realnet.py][line: 264][    INFO] Epoch: [81/1000]	Iter: [7440/92000]	Loss 3.75646 (3.77551)	
+[2024-09-05 12:49:57,116][train_realnet.py][line: 264][    INFO] Epoch: [82/1000]	Iter: [7460/92000]	Loss 3.60392 (3.83618)	
+[2024-09-05 12:50:18,686][train_realnet.py][line: 264][    INFO] Epoch: [82/1000]	Iter: [7480/92000]	Loss 3.80824 (3.75644)	
+[2024-09-05 12:50:40,078][train_realnet.py][line: 264][    INFO] Epoch: [82/1000]	Iter: [7500/92000]	Loss 3.82764 (3.82004)	
+[2024-09-05 12:51:01,520][train_realnet.py][line: 264][    INFO] Epoch: [82/1000]	Iter: [7520/92000]	Loss 3.72530 (3.80791)	
+[2024-09-05 12:51:23,345][train_realnet.py][line: 264][    INFO] Epoch: [82/1000]	Iter: [7540/92000]	Loss 3.82132 (3.77889)	
+[2024-09-05 12:51:49,051][train_realnet.py][line: 264][    INFO] Epoch: [83/1000]	Iter: [7560/92000]	Loss 4.03488 (3.78525)	
+[2024-09-05 12:52:10,380][train_realnet.py][line: 264][    INFO] Epoch: [83/1000]	Iter: [7580/92000]	Loss 3.76915 (3.70618)	
+[2024-09-05 12:52:31,251][train_realnet.py][line: 264][    INFO] Epoch: [83/1000]	Iter: [7600/92000]	Loss 3.74956 (3.72651)	
+[2024-09-05 12:52:53,632][train_realnet.py][line: 264][    INFO] Epoch: [83/1000]	Iter: [7620/92000]	Loss 3.73965 (3.73176)	
+[2024-09-05 12:53:19,191][train_realnet.py][line: 264][    INFO] Epoch: [84/1000]	Iter: [7640/92000]	Loss 3.82201 (3.67328)	
+[2024-09-05 12:53:40,410][train_realnet.py][line: 264][    INFO] Epoch: [84/1000]	Iter: [7660/92000]	Loss 3.65454 (3.76977)	
+[2024-09-05 12:54:02,671][train_realnet.py][line: 264][    INFO] Epoch: [84/1000]	Iter: [7680/92000]	Loss 3.51352 (3.78211)	
+[2024-09-05 12:54:24,689][train_realnet.py][line: 264][    INFO] Epoch: [84/1000]	Iter: [7700/92000]	Loss 3.77298 (3.75345)	
+[2024-09-05 12:54:45,164][train_realnet.py][line: 264][    INFO] Epoch: [84/1000]	Iter: [7720/92000]	Loss 3.67014 (3.72042)	
+[2024-09-05 12:55:11,188][train_realnet.py][line: 264][    INFO] Epoch: [85/1000]	Iter: [7740/92000]	Loss 3.50200 (3.68584)	
+[2024-09-05 12:55:32,778][train_realnet.py][line: 264][    INFO] Epoch: [85/1000]	Iter: [7760/92000]	Loss 3.87031 (3.65849)	
+[2024-09-05 12:55:54,931][train_realnet.py][line: 264][    INFO] Epoch: [85/1000]	Iter: [7780/92000]	Loss 3.54870 (3.72133)	
+[2024-09-05 12:56:16,338][train_realnet.py][line: 264][    INFO] Epoch: [85/1000]	Iter: [7800/92000]	Loss 3.69123 (3.68265)	
+[2024-09-05 12:56:36,801][train_realnet.py][line: 264][    INFO] Epoch: [85/1000]	Iter: [7820/92000]	Loss 3.60810 (3.67297)	
+[2024-09-05 12:56:53,408][train_realnet.py][line: 320][    INFO]  * Loss 0.00511
+[2024-09-05 12:57:08,523][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.625333 | 0.742324 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 12:57:39,652][train_realnet.py][line: 264][    INFO] Epoch: [86/1000]	Iter: [7840/92000]	Loss 3.65836 (3.75241)	
+[2024-09-05 12:58:01,023][train_realnet.py][line: 264][    INFO] Epoch: [86/1000]	Iter: [7860/92000]	Loss 3.46199 (3.71820)	
+[2024-09-05 12:58:22,889][train_realnet.py][line: 264][    INFO] Epoch: [86/1000]	Iter: [7880/92000]	Loss 3.88110 (3.74428)	
+[2024-09-05 12:58:44,518][train_realnet.py][line: 264][    INFO] Epoch: [86/1000]	Iter: [7900/92000]	Loss 3.71977 (3.66650)	
+[2024-09-05 12:59:10,375][train_realnet.py][line: 264][    INFO] Epoch: [87/1000]	Iter: [7920/92000]	Loss 3.85772 (3.68822)	
+[2024-09-05 12:59:31,403][train_realnet.py][line: 264][    INFO] Epoch: [87/1000]	Iter: [7940/92000]	Loss 3.69552 (3.73941)	
+[2024-09-05 12:59:53,138][train_realnet.py][line: 264][    INFO] Epoch: [87/1000]	Iter: [7960/92000]	Loss 3.52892 (3.70699)	
+[2024-09-05 13:00:14,239][train_realnet.py][line: 264][    INFO] Epoch: [87/1000]	Iter: [7980/92000]	Loss 4.23785 (3.78108)	
+[2024-09-05 13:00:35,715][train_realnet.py][line: 264][    INFO] Epoch: [87/1000]	Iter: [8000/92000]	Loss 3.63640 (3.71082)	
+[2024-09-05 13:01:02,353][train_realnet.py][line: 264][    INFO] Epoch: [88/1000]	Iter: [8020/92000]	Loss 3.59148 (3.66975)	
+[2024-09-05 13:01:23,440][train_realnet.py][line: 264][    INFO] Epoch: [88/1000]	Iter: [8040/92000]	Loss 3.61217 (3.71174)	
+[2024-09-05 13:01:45,067][train_realnet.py][line: 264][    INFO] Epoch: [88/1000]	Iter: [8060/92000]	Loss 3.70663 (3.75466)	
+[2024-09-05 13:02:06,592][train_realnet.py][line: 264][    INFO] Epoch: [88/1000]	Iter: [8080/92000]	Loss 3.70369 (3.68893)	
+[2024-09-05 13:02:31,144][train_realnet.py][line: 264][    INFO] Epoch: [89/1000]	Iter: [8100/92000]	Loss 3.53073 (3.66306)	
+[2024-09-05 13:02:52,193][train_realnet.py][line: 264][    INFO] Epoch: [89/1000]	Iter: [8120/92000]	Loss 3.48748 (3.61988)	
+[2024-09-05 13:03:13,417][train_realnet.py][line: 264][    INFO] Epoch: [89/1000]	Iter: [8140/92000]	Loss 3.48886 (3.66169)	
+[2024-09-05 13:03:35,094][train_realnet.py][line: 264][    INFO] Epoch: [89/1000]	Iter: [8160/92000]	Loss 3.81723 (3.63597)	
+[2024-09-05 13:03:56,589][train_realnet.py][line: 264][    INFO] Epoch: [89/1000]	Iter: [8180/92000]	Loss 3.61051 (3.65022)	
+[2024-09-05 13:04:23,694][train_realnet.py][line: 264][    INFO] Epoch: [90/1000]	Iter: [8200/92000]	Loss 3.50252 (3.67109)	
+[2024-09-05 13:04:45,138][train_realnet.py][line: 264][    INFO] Epoch: [90/1000]	Iter: [8220/92000]	Loss 3.64888 (3.65317)	
+[2024-09-05 13:05:06,591][train_realnet.py][line: 264][    INFO] Epoch: [90/1000]	Iter: [8240/92000]	Loss 3.47080 (3.68870)	
+[2024-09-05 13:05:27,780][train_realnet.py][line: 264][    INFO] Epoch: [90/1000]	Iter: [8260/92000]	Loss 3.80682 (3.66326)	
+[2024-09-05 13:05:48,338][train_realnet.py][line: 264][    INFO] Epoch: [90/1000]	Iter: [8280/92000]	Loss 3.92772 (3.61928)	
+[2024-09-05 13:06:05,036][train_realnet.py][line: 320][    INFO]  * Loss 0.00547
+[2024-09-05 13:06:20,086][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.623417 | 0.700246 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 13:06:45,859][train_realnet.py][line: 264][    INFO] Epoch: [91/1000]	Iter: [8300/92000]	Loss 3.54740 (3.60104)	
+[2024-09-05 13:07:07,235][train_realnet.py][line: 264][    INFO] Epoch: [91/1000]	Iter: [8320/92000]	Loss 3.79998 (3.67351)	
+[2024-09-05 13:07:28,771][train_realnet.py][line: 264][    INFO] Epoch: [91/1000]	Iter: [8340/92000]	Loss 3.77896 (3.67074)	
+[2024-09-05 13:07:50,328][train_realnet.py][line: 264][    INFO] Epoch: [91/1000]	Iter: [8360/92000]	Loss 3.89775 (3.63390)	
+[2024-09-05 13:08:15,447][train_realnet.py][line: 264][    INFO] Epoch: [92/1000]	Iter: [8380/92000]	Loss 3.71224 (3.61842)	
+[2024-09-05 13:08:36,495][train_realnet.py][line: 264][    INFO] Epoch: [92/1000]	Iter: [8400/92000]	Loss 3.50283 (3.64750)	
+[2024-09-05 13:08:57,276][train_realnet.py][line: 264][    INFO] Epoch: [92/1000]	Iter: [8420/92000]	Loss 3.66943 (3.60806)	
+[2024-09-05 13:09:19,027][train_realnet.py][line: 264][    INFO] Epoch: [92/1000]	Iter: [8440/92000]	Loss 3.87175 (3.62084)	
+[2024-09-05 13:09:39,758][train_realnet.py][line: 264][    INFO] Epoch: [92/1000]	Iter: [8460/92000]	Loss 3.85381 (3.65494)	
+[2024-09-05 13:10:06,338][train_realnet.py][line: 264][    INFO] Epoch: [93/1000]	Iter: [8480/92000]	Loss 3.50920 (3.62737)	
+[2024-09-05 13:10:27,394][train_realnet.py][line: 264][    INFO] Epoch: [93/1000]	Iter: [8500/92000]	Loss 3.55256 (3.63636)	
+[2024-09-05 13:10:48,644][train_realnet.py][line: 264][    INFO] Epoch: [93/1000]	Iter: [8520/92000]	Loss 3.43480 (3.61358)	
+[2024-09-05 13:11:10,062][train_realnet.py][line: 264][    INFO] Epoch: [93/1000]	Iter: [8540/92000]	Loss 3.52811 (3.57689)	
+[2024-09-05 13:11:35,706][train_realnet.py][line: 264][    INFO] Epoch: [94/1000]	Iter: [8560/92000]	Loss 3.58212 (3.51806)	
+[2024-09-05 13:11:56,632][train_realnet.py][line: 264][    INFO] Epoch: [94/1000]	Iter: [8580/92000]	Loss 3.55779 (3.59879)	
+[2024-09-05 13:12:17,549][train_realnet.py][line: 264][    INFO] Epoch: [94/1000]	Iter: [8600/92000]	Loss 3.61480 (3.63570)	
+[2024-09-05 13:12:38,978][train_realnet.py][line: 264][    INFO] Epoch: [94/1000]	Iter: [8620/92000]	Loss 3.52010 (3.56439)	
+[2024-09-05 13:13:00,515][train_realnet.py][line: 264][    INFO] Epoch: [94/1000]	Iter: [8640/92000]	Loss 3.58886 (3.62856)	
+[2024-09-05 13:13:25,942][train_realnet.py][line: 264][    INFO] Epoch: [95/1000]	Iter: [8660/92000]	Loss 3.55712 (3.56376)	
+[2024-09-05 13:13:47,531][train_realnet.py][line: 264][    INFO] Epoch: [95/1000]	Iter: [8680/92000]	Loss 3.79764 (3.57264)	
+[2024-09-05 13:14:10,642][train_realnet.py][line: 264][    INFO] Epoch: [95/1000]	Iter: [8700/92000]	Loss 3.51448 (3.58947)	
+[2024-09-05 13:14:31,844][train_realnet.py][line: 264][    INFO] Epoch: [95/1000]	Iter: [8720/92000]	Loss 3.47205 (3.60423)	
+[2024-09-05 13:14:52,567][train_realnet.py][line: 264][    INFO] Epoch: [95/1000]	Iter: [8740/92000]	Loss 3.78645 (3.55533)	
+[2024-09-05 13:15:08,866][train_realnet.py][line: 320][    INFO]  * Loss 0.00524
+[2024-09-05 13:15:23,351][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.609833 | 0.707997 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 13:15:50,212][train_realnet.py][line: 264][    INFO] Epoch: [96/1000]	Iter: [8760/92000]	Loss 3.59036 (3.58051)	
+[2024-09-05 13:16:10,760][train_realnet.py][line: 264][    INFO] Epoch: [96/1000]	Iter: [8780/92000]	Loss 3.65093 (3.64387)	
+[2024-09-05 13:16:31,733][train_realnet.py][line: 264][    INFO] Epoch: [96/1000]	Iter: [8800/92000]	Loss 3.54518 (3.49421)	
+[2024-09-05 13:16:53,295][train_realnet.py][line: 264][    INFO] Epoch: [96/1000]	Iter: [8820/92000]	Loss 3.57645 (3.54169)	
+[2024-09-05 13:17:18,945][train_realnet.py][line: 264][    INFO] Epoch: [97/1000]	Iter: [8840/92000]	Loss 3.72826 (3.50851)	
+[2024-09-05 13:17:40,352][train_realnet.py][line: 264][    INFO] Epoch: [97/1000]	Iter: [8860/92000]	Loss 3.59614 (3.58518)	
+[2024-09-05 13:18:03,182][train_realnet.py][line: 264][    INFO] Epoch: [97/1000]	Iter: [8880/92000]	Loss 3.62431 (3.48386)	
+[2024-09-05 13:18:25,056][train_realnet.py][line: 264][    INFO] Epoch: [97/1000]	Iter: [8900/92000]	Loss 3.49125 (3.53802)	
+[2024-09-05 13:18:45,687][train_realnet.py][line: 264][    INFO] Epoch: [97/1000]	Iter: [8920/92000]	Loss 3.80441 (3.61071)	
+[2024-09-05 13:19:11,841][train_realnet.py][line: 264][    INFO] Epoch: [98/1000]	Iter: [8940/92000]	Loss 3.67187 (3.54761)	
+[2024-09-05 13:19:33,306][train_realnet.py][line: 264][    INFO] Epoch: [98/1000]	Iter: [8960/92000]	Loss 3.76435 (3.54995)	
+[2024-09-05 13:19:54,856][train_realnet.py][line: 264][    INFO] Epoch: [98/1000]	Iter: [8980/92000]	Loss 3.35791 (3.47931)	
+[2024-09-05 13:20:16,652][train_realnet.py][line: 264][    INFO] Epoch: [98/1000]	Iter: [9000/92000]	Loss 3.65683 (3.59075)	
+[2024-09-05 13:20:44,193][train_realnet.py][line: 264][    INFO] Epoch: [99/1000]	Iter: [9020/92000]	Loss 3.57238 (3.49211)	
+[2024-09-05 13:21:05,832][train_realnet.py][line: 264][    INFO] Epoch: [99/1000]	Iter: [9040/92000]	Loss 3.48892 (3.57918)	
+[2024-09-05 13:21:27,048][train_realnet.py][line: 264][    INFO] Epoch: [99/1000]	Iter: [9060/92000]	Loss 3.37726 (3.46090)	
+[2024-09-05 13:21:49,169][train_realnet.py][line: 264][    INFO] Epoch: [99/1000]	Iter: [9080/92000]	Loss 3.41267 (3.62786)	
+[2024-09-05 13:22:09,786][train_realnet.py][line: 264][    INFO] Epoch: [99/1000]	Iter: [9100/92000]	Loss 3.66138 (3.48004)	
+[2024-09-05 13:22:36,191][train_realnet.py][line: 264][    INFO] Epoch: [100/1000]	Iter: [9120/92000]	Loss 3.80591 (3.50295)	
+[2024-09-05 13:22:57,518][train_realnet.py][line: 264][    INFO] Epoch: [100/1000]	Iter: [9140/92000]	Loss 3.53980 (3.50101)	
+[2024-09-05 13:23:19,589][train_realnet.py][line: 264][    INFO] Epoch: [100/1000]	Iter: [9160/92000]	Loss 3.38502 (3.52347)	
+[2024-09-05 13:23:40,645][train_realnet.py][line: 264][    INFO] Epoch: [100/1000]	Iter: [9180/92000]	Loss 3.59779 (3.55120)	
+[2024-09-05 13:24:01,878][train_realnet.py][line: 264][    INFO] Epoch: [100/1000]	Iter: [9200/92000]	Loss 3.24254 (3.55123)	
+[2024-09-05 13:24:18,833][train_realnet.py][line: 320][    INFO]  * Loss 0.01094
+[2024-09-05 13:24:33,848][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.60525  | 0.695189 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 13:24:59,936][train_realnet.py][line: 264][    INFO] Epoch: [101/1000]	Iter: [9220/92000]	Loss 3.47281 (3.53592)	
+[2024-09-05 13:25:22,180][train_realnet.py][line: 264][    INFO] Epoch: [101/1000]	Iter: [9240/92000]	Loss 3.37416 (3.53484)	
+[2024-09-05 13:25:44,465][train_realnet.py][line: 264][    INFO] Epoch: [101/1000]	Iter: [9260/92000]	Loss 3.76704 (3.53135)	
+[2024-09-05 13:26:05,938][train_realnet.py][line: 264][    INFO] Epoch: [101/1000]	Iter: [9280/92000]	Loss 3.32306 (3.52369)	
+[2024-09-05 13:26:31,052][train_realnet.py][line: 264][    INFO] Epoch: [102/1000]	Iter: [9300/92000]	Loss 3.86338 (3.61847)	
+[2024-09-05 13:26:52,279][train_realnet.py][line: 264][    INFO] Epoch: [102/1000]	Iter: [9320/92000]	Loss 3.77657 (3.50753)	
+[2024-09-05 13:27:13,239][train_realnet.py][line: 264][    INFO] Epoch: [102/1000]	Iter: [9340/92000]	Loss 3.44499 (3.52093)	
+[2024-09-05 13:27:34,985][train_realnet.py][line: 264][    INFO] Epoch: [102/1000]	Iter: [9360/92000]	Loss 3.82472 (3.52883)	
+[2024-09-05 13:27:56,197][train_realnet.py][line: 264][    INFO] Epoch: [102/1000]	Iter: [9380/92000]	Loss 3.49354 (3.47757)	
+[2024-09-05 13:28:22,481][train_realnet.py][line: 264][    INFO] Epoch: [103/1000]	Iter: [9400/92000]	Loss 3.28553 (3.50138)	
+[2024-09-05 13:28:43,198][train_realnet.py][line: 264][    INFO] Epoch: [103/1000]	Iter: [9420/92000]	Loss 3.53318 (3.46698)	
+[2024-09-05 13:29:04,532][train_realnet.py][line: 264][    INFO] Epoch: [103/1000]	Iter: [9440/92000]	Loss 3.18704 (3.56539)	
+[2024-09-05 13:29:24,993][train_realnet.py][line: 264][    INFO] Epoch: [103/1000]	Iter: [9460/92000]	Loss 3.49006 (3.50959)	
+[2024-09-05 13:29:52,002][train_realnet.py][line: 264][    INFO] Epoch: [104/1000]	Iter: [9480/92000]	Loss 3.39175 (3.52357)	
+[2024-09-05 13:30:13,311][train_realnet.py][line: 264][    INFO] Epoch: [104/1000]	Iter: [9500/92000]	Loss 3.51860 (3.51011)	
+[2024-09-05 13:30:34,975][train_realnet.py][line: 264][    INFO] Epoch: [104/1000]	Iter: [9520/92000]	Loss 3.74256 (3.50474)	
+[2024-09-05 13:30:55,963][train_realnet.py][line: 264][    INFO] Epoch: [104/1000]	Iter: [9540/92000]	Loss 3.62781 (3.55641)	
+[2024-09-05 13:31:18,013][train_realnet.py][line: 264][    INFO] Epoch: [104/1000]	Iter: [9560/92000]	Loss 3.58842 (3.47864)	
+[2024-09-05 13:31:43,148][train_realnet.py][line: 264][    INFO] Epoch: [105/1000]	Iter: [9580/92000]	Loss 3.47027 (3.51406)	
+[2024-09-05 13:32:04,939][train_realnet.py][line: 264][    INFO] Epoch: [105/1000]	Iter: [9600/92000]	Loss 3.60844 (3.48385)	
+[2024-09-05 13:32:26,510][train_realnet.py][line: 264][    INFO] Epoch: [105/1000]	Iter: [9620/92000]	Loss 3.48148 (3.49965)	
+[2024-09-05 13:32:48,214][train_realnet.py][line: 264][    INFO] Epoch: [105/1000]	Iter: [9640/92000]	Loss 3.86068 (3.53676)	
+[2024-09-05 13:33:09,264][train_realnet.py][line: 264][    INFO] Epoch: [105/1000]	Iter: [9660/92000]	Loss 3.55453 (3.44427)	
+[2024-09-05 13:33:26,184][train_realnet.py][line: 320][    INFO]  * Loss 0.00495
+[2024-09-05 13:33:40,871][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.621028 | 0.72938  |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 13:34:06,623][train_realnet.py][line: 264][    INFO] Epoch: [106/1000]	Iter: [9680/92000]	Loss 3.26597 (3.46072)	
+[2024-09-05 13:34:28,238][train_realnet.py][line: 264][    INFO] Epoch: [106/1000]	Iter: [9700/92000]	Loss 3.31257 (3.48453)	
+[2024-09-05 13:34:49,030][train_realnet.py][line: 264][    INFO] Epoch: [106/1000]	Iter: [9720/92000]	Loss 3.47577 (3.46605)	
+[2024-09-05 13:35:10,687][train_realnet.py][line: 264][    INFO] Epoch: [106/1000]	Iter: [9740/92000]	Loss 3.43180 (3.49973)	
+[2024-09-05 13:35:36,345][train_realnet.py][line: 264][    INFO] Epoch: [107/1000]	Iter: [9760/92000]	Loss 3.55123 (3.41468)	
+[2024-09-05 13:35:58,233][train_realnet.py][line: 264][    INFO] Epoch: [107/1000]	Iter: [9780/92000]	Loss 3.37250 (3.44176)	
+[2024-09-05 13:36:19,228][train_realnet.py][line: 264][    INFO] Epoch: [107/1000]	Iter: [9800/92000]	Loss 3.40057 (3.45466)	
+[2024-09-05 13:36:40,051][train_realnet.py][line: 264][    INFO] Epoch: [107/1000]	Iter: [9820/92000]	Loss 3.63496 (3.46545)	
+[2024-09-05 13:37:02,049][train_realnet.py][line: 264][    INFO] Epoch: [107/1000]	Iter: [9840/92000]	Loss 3.48762 (3.46381)	
+[2024-09-05 13:37:28,251][train_realnet.py][line: 264][    INFO] Epoch: [108/1000]	Iter: [9860/92000]	Loss 3.45868 (3.41716)	
+[2024-09-05 13:37:49,636][train_realnet.py][line: 264][    INFO] Epoch: [108/1000]	Iter: [9880/92000]	Loss 3.51538 (3.41501)	
+[2024-09-05 13:38:11,163][train_realnet.py][line: 264][    INFO] Epoch: [108/1000]	Iter: [9900/92000]	Loss 3.52139 (3.42528)	
+[2024-09-05 13:38:33,591][train_realnet.py][line: 264][    INFO] Epoch: [108/1000]	Iter: [9920/92000]	Loss 3.55908 (3.39800)	
+[2024-09-05 13:38:59,702][train_realnet.py][line: 264][    INFO] Epoch: [109/1000]	Iter: [9940/92000]	Loss 3.32814 (3.33684)	
+[2024-09-05 13:39:20,663][train_realnet.py][line: 264][    INFO] Epoch: [109/1000]	Iter: [9960/92000]	Loss 3.44788 (3.39389)	
+[2024-09-05 13:39:41,774][train_realnet.py][line: 264][    INFO] Epoch: [109/1000]	Iter: [9980/92000]	Loss 3.44002 (3.39001)	
+[2024-09-05 13:40:03,134][train_realnet.py][line: 264][    INFO] Epoch: [109/1000]	Iter: [10000/92000]	Loss 3.18184 (3.45287)	
+[2024-09-05 13:40:24,395][train_realnet.py][line: 264][    INFO] Epoch: [109/1000]	Iter: [10020/92000]	Loss 3.53800 (3.44207)	
+[2024-09-05 13:40:50,408][train_realnet.py][line: 264][    INFO] Epoch: [110/1000]	Iter: [10040/92000]	Loss 3.39393 (3.42637)	
+[2024-09-05 13:41:12,286][train_realnet.py][line: 264][    INFO] Epoch: [110/1000]	Iter: [10060/92000]	Loss 3.79175 (3.50158)	
+[2024-09-05 13:41:33,655][train_realnet.py][line: 264][    INFO] Epoch: [110/1000]	Iter: [10080/92000]	Loss 3.20738 (3.41287)	
+[2024-09-05 13:41:55,233][train_realnet.py][line: 264][    INFO] Epoch: [110/1000]	Iter: [10100/92000]	Loss 3.22218 (3.44959)	
+[2024-09-05 13:42:16,153][train_realnet.py][line: 264][    INFO] Epoch: [110/1000]	Iter: [10120/92000]	Loss 3.83203 (3.42257)	
+[2024-09-05 13:42:32,688][train_realnet.py][line: 320][    INFO]  * Loss 0.00485
+[2024-09-05 13:42:47,002][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.632361 | 0.722996 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 13:43:13,517][train_realnet.py][line: 264][    INFO] Epoch: [111/1000]	Iter: [10140/92000]	Loss 3.02896 (3.35175)	
+[2024-09-05 13:43:34,786][train_realnet.py][line: 264][    INFO] Epoch: [111/1000]	Iter: [10160/92000]	Loss 3.52770 (3.44902)	
+[2024-09-05 13:43:56,309][train_realnet.py][line: 264][    INFO] Epoch: [111/1000]	Iter: [10180/92000]	Loss 3.35911 (3.43682)	
+[2024-09-05 13:44:16,950][train_realnet.py][line: 264][    INFO] Epoch: [111/1000]	Iter: [10200/92000]	Loss 3.82506 (3.43769)	
+[2024-09-05 13:44:43,051][train_realnet.py][line: 264][    INFO] Epoch: [112/1000]	Iter: [10220/92000]	Loss 3.38928 (3.41577)	
+[2024-09-05 13:45:04,961][train_realnet.py][line: 264][    INFO] Epoch: [112/1000]	Iter: [10240/92000]	Loss 3.56534 (3.38942)	
+[2024-09-05 13:45:25,380][train_realnet.py][line: 264][    INFO] Epoch: [112/1000]	Iter: [10260/92000]	Loss 3.41437 (3.34031)	
+[2024-09-05 13:45:46,068][train_realnet.py][line: 264][    INFO] Epoch: [112/1000]	Iter: [10280/92000]	Loss 3.09322 (3.43901)	
+[2024-09-05 13:46:07,073][train_realnet.py][line: 264][    INFO] Epoch: [112/1000]	Iter: [10300/92000]	Loss 3.27249 (3.41382)	
+[2024-09-05 13:46:32,298][train_realnet.py][line: 264][    INFO] Epoch: [113/1000]	Iter: [10320/92000]	Loss 3.16981 (3.44779)	
+[2024-09-05 13:46:53,685][train_realnet.py][line: 264][    INFO] Epoch: [113/1000]	Iter: [10340/92000]	Loss 3.51822 (3.40119)	
+[2024-09-05 13:47:15,392][train_realnet.py][line: 264][    INFO] Epoch: [113/1000]	Iter: [10360/92000]	Loss 3.43705 (3.41083)	
+[2024-09-05 13:47:37,083][train_realnet.py][line: 264][    INFO] Epoch: [113/1000]	Iter: [10380/92000]	Loss 3.26322 (3.42237)	
+[2024-09-05 13:48:03,517][train_realnet.py][line: 264][    INFO] Epoch: [114/1000]	Iter: [10400/92000]	Loss 3.38052 (3.27404)	
+[2024-09-05 13:48:24,216][train_realnet.py][line: 264][    INFO] Epoch: [114/1000]	Iter: [10420/92000]	Loss 3.25482 (3.37694)	
+[2024-09-05 13:48:46,362][train_realnet.py][line: 264][    INFO] Epoch: [114/1000]	Iter: [10440/92000]	Loss 3.55688 (3.46636)	
+[2024-09-05 13:49:07,172][train_realnet.py][line: 264][    INFO] Epoch: [114/1000]	Iter: [10460/92000]	Loss 3.45104 (3.39271)	
+[2024-09-05 13:49:28,871][train_realnet.py][line: 264][    INFO] Epoch: [114/1000]	Iter: [10480/92000]	Loss 3.71352 (3.43695)	
+[2024-09-05 13:49:54,739][train_realnet.py][line: 264][    INFO] Epoch: [115/1000]	Iter: [10500/92000]	Loss 3.38722 (3.47392)	
+[2024-09-05 13:50:15,776][train_realnet.py][line: 264][    INFO] Epoch: [115/1000]	Iter: [10520/92000]	Loss 3.29838 (3.37390)	
+[2024-09-05 13:50:37,112][train_realnet.py][line: 264][    INFO] Epoch: [115/1000]	Iter: [10540/92000]	Loss 3.37613 (3.28806)	
+[2024-09-05 13:50:58,724][train_realnet.py][line: 264][    INFO] Epoch: [115/1000]	Iter: [10560/92000]	Loss 3.17153 (3.38689)	
+[2024-09-05 13:51:21,105][train_realnet.py][line: 264][    INFO] Epoch: [115/1000]	Iter: [10580/92000]	Loss 3.23175 (3.37319)	
+[2024-09-05 13:51:37,621][train_realnet.py][line: 320][    INFO]  * Loss 0.00650
+[2024-09-05 13:51:52,201][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.597278 | 0.705164 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 13:52:18,207][train_realnet.py][line: 264][    INFO] Epoch: [116/1000]	Iter: [10600/92000]	Loss 3.61749 (3.35840)	
+[2024-09-05 13:52:39,959][train_realnet.py][line: 264][    INFO] Epoch: [116/1000]	Iter: [10620/92000]	Loss 3.16370 (3.36134)	
+[2024-09-05 13:53:02,034][train_realnet.py][line: 264][    INFO] Epoch: [116/1000]	Iter: [10640/92000]	Loss 2.94510 (3.30843)	
+[2024-09-05 13:53:24,156][train_realnet.py][line: 264][    INFO] Epoch: [116/1000]	Iter: [10660/92000]	Loss 3.40978 (3.47347)	
+[2024-09-05 13:53:50,306][train_realnet.py][line: 264][    INFO] Epoch: [117/1000]	Iter: [10680/92000]	Loss 3.50294 (3.31802)	
+[2024-09-05 13:54:11,633][train_realnet.py][line: 264][    INFO] Epoch: [117/1000]	Iter: [10700/92000]	Loss 2.98349 (3.31799)	
+[2024-09-05 13:54:33,550][train_realnet.py][line: 264][    INFO] Epoch: [117/1000]	Iter: [10720/92000]	Loss 3.25647 (3.34233)	
+[2024-09-05 13:54:55,926][train_realnet.py][line: 264][    INFO] Epoch: [117/1000]	Iter: [10740/92000]	Loss 3.45466 (3.40409)	
+[2024-09-05 13:55:17,070][train_realnet.py][line: 264][    INFO] Epoch: [117/1000]	Iter: [10760/92000]	Loss 3.23957 (3.33087)	
+[2024-09-05 13:55:42,557][train_realnet.py][line: 264][    INFO] Epoch: [118/1000]	Iter: [10780/92000]	Loss 3.50131 (3.32624)	
+[2024-09-05 13:56:04,888][train_realnet.py][line: 264][    INFO] Epoch: [118/1000]	Iter: [10800/92000]	Loss 3.25178 (3.34431)	
+[2024-09-05 13:56:25,747][train_realnet.py][line: 264][    INFO] Epoch: [118/1000]	Iter: [10820/92000]	Loss 3.24680 (3.37542)	
+[2024-09-05 13:56:46,889][train_realnet.py][line: 264][    INFO] Epoch: [118/1000]	Iter: [10840/92000]	Loss 3.64344 (3.35338)	
+[2024-09-05 13:57:12,635][train_realnet.py][line: 264][    INFO] Epoch: [119/1000]	Iter: [10860/92000]	Loss 3.57061 (3.52528)	
+[2024-09-05 13:57:34,440][train_realnet.py][line: 264][    INFO] Epoch: [119/1000]	Iter: [10880/92000]	Loss 3.61004 (3.42436)	
+[2024-09-05 13:57:55,952][train_realnet.py][line: 264][    INFO] Epoch: [119/1000]	Iter: [10900/92000]	Loss 3.32564 (3.36673)	
+[2024-09-05 13:58:18,284][train_realnet.py][line: 264][    INFO] Epoch: [119/1000]	Iter: [10920/92000]	Loss 3.16806 (3.31437)	
+[2024-09-05 13:58:39,581][train_realnet.py][line: 264][    INFO] Epoch: [119/1000]	Iter: [10940/92000]	Loss 3.32213 (3.34788)	
+[2024-09-05 13:59:05,753][train_realnet.py][line: 264][    INFO] Epoch: [120/1000]	Iter: [10960/92000]	Loss 3.24655 (3.35643)	
+[2024-09-05 13:59:27,353][train_realnet.py][line: 264][    INFO] Epoch: [120/1000]	Iter: [10980/92000]	Loss 3.42588 (3.33691)	
+[2024-09-05 13:59:48,231][train_realnet.py][line: 264][    INFO] Epoch: [120/1000]	Iter: [11000/92000]	Loss 3.37781 (3.34720)	
+[2024-09-05 14:00:10,160][train_realnet.py][line: 264][    INFO] Epoch: [120/1000]	Iter: [11020/92000]	Loss 3.30116 (3.34308)	
+[2024-09-05 14:00:31,240][train_realnet.py][line: 264][    INFO] Epoch: [120/1000]	Iter: [11040/92000]	Loss 3.49684 (3.35336)	
+[2024-09-05 14:00:47,463][train_realnet.py][line: 320][    INFO]  * Loss 0.00593
+[2024-09-05 14:01:02,807][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.590361 | 0.722039 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 14:01:28,821][train_realnet.py][line: 264][    INFO] Epoch: [121/1000]	Iter: [11060/92000]	Loss 3.33694 (3.37735)	
+[2024-09-05 14:01:50,709][train_realnet.py][line: 264][    INFO] Epoch: [121/1000]	Iter: [11080/92000]	Loss 3.29619 (3.36719)	
+[2024-09-05 14:02:11,585][train_realnet.py][line: 264][    INFO] Epoch: [121/1000]	Iter: [11100/92000]	Loss 3.44283 (3.38612)	
+[2024-09-05 14:02:32,421][train_realnet.py][line: 264][    INFO] Epoch: [121/1000]	Iter: [11120/92000]	Loss 3.07781 (3.29198)	
+[2024-09-05 14:02:57,538][train_realnet.py][line: 264][    INFO] Epoch: [122/1000]	Iter: [11140/92000]	Loss 3.32998 (3.28385)	
+[2024-09-05 14:03:18,820][train_realnet.py][line: 264][    INFO] Epoch: [122/1000]	Iter: [11160/92000]	Loss 3.46290 (3.26282)	
+[2024-09-05 14:03:39,654][train_realnet.py][line: 264][    INFO] Epoch: [122/1000]	Iter: [11180/92000]	Loss 3.24404 (3.34514)	
+[2024-09-05 14:04:00,268][train_realnet.py][line: 264][    INFO] Epoch: [122/1000]	Iter: [11200/92000]	Loss 3.37299 (3.29608)	
+[2024-09-05 14:04:21,921][train_realnet.py][line: 264][    INFO] Epoch: [122/1000]	Iter: [11220/92000]	Loss 3.19915 (3.36183)	
+[2024-09-05 14:04:47,869][train_realnet.py][line: 264][    INFO] Epoch: [123/1000]	Iter: [11240/92000]	Loss 3.07061 (3.33107)	
+[2024-09-05 14:05:09,004][train_realnet.py][line: 264][    INFO] Epoch: [123/1000]	Iter: [11260/92000]	Loss 3.16584 (3.30267)	
+[2024-09-05 14:05:30,025][train_realnet.py][line: 264][    INFO] Epoch: [123/1000]	Iter: [11280/92000]	Loss 3.28598 (3.28232)	
+[2024-09-05 14:05:51,511][train_realnet.py][line: 264][    INFO] Epoch: [123/1000]	Iter: [11300/92000]	Loss 3.53093 (3.36192)	
+[2024-09-05 14:06:18,316][train_realnet.py][line: 264][    INFO] Epoch: [124/1000]	Iter: [11320/92000]	Loss 3.10324 (3.22225)	
+[2024-09-05 14:06:39,512][train_realnet.py][line: 264][    INFO] Epoch: [124/1000]	Iter: [11340/92000]	Loss 3.32130 (3.33302)	
+[2024-09-05 14:07:00,130][train_realnet.py][line: 264][    INFO] Epoch: [124/1000]	Iter: [11360/92000]	Loss 3.36654 (3.26278)	
+[2024-09-05 14:07:22,338][train_realnet.py][line: 264][    INFO] Epoch: [124/1000]	Iter: [11380/92000]	Loss 3.38383 (3.31885)	
+[2024-09-05 14:07:43,028][train_realnet.py][line: 264][    INFO] Epoch: [124/1000]	Iter: [11400/92000]	Loss 3.41214 (3.28816)	
+[2024-09-05 14:08:10,076][train_realnet.py][line: 264][    INFO] Epoch: [125/1000]	Iter: [11420/92000]	Loss 3.23772 (3.27999)	
+[2024-09-05 14:08:31,029][train_realnet.py][line: 264][    INFO] Epoch: [125/1000]	Iter: [11440/92000]	Loss 3.05286 (3.32228)	
+[2024-09-05 14:08:52,460][train_realnet.py][line: 264][    INFO] Epoch: [125/1000]	Iter: [11460/92000]	Loss 3.14710 (3.33898)	
+[2024-09-05 14:09:13,330][train_realnet.py][line: 264][    INFO] Epoch: [125/1000]	Iter: [11480/92000]	Loss 3.42476 (3.31791)	
+[2024-09-05 14:09:33,195][train_realnet.py][line: 264][    INFO] Epoch: [125/1000]	Iter: [11500/92000]	Loss 3.18599 (3.26428)	
+[2024-09-05 14:09:49,416][train_realnet.py][line: 320][    INFO]  * Loss 0.01007
+[2024-09-05 14:10:04,581][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.607556 | 0.718678 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 14:10:31,473][train_realnet.py][line: 264][    INFO] Epoch: [126/1000]	Iter: [11520/92000]	Loss 3.27711 (3.30358)	
+[2024-09-05 14:10:52,894][train_realnet.py][line: 264][    INFO] Epoch: [126/1000]	Iter: [11540/92000]	Loss 3.27626 (3.28244)	
+[2024-09-05 14:11:13,703][train_realnet.py][line: 264][    INFO] Epoch: [126/1000]	Iter: [11560/92000]	Loss 3.52428 (3.34443)	
+[2024-09-05 14:11:34,362][train_realnet.py][line: 264][    INFO] Epoch: [126/1000]	Iter: [11580/92000]	Loss 3.55457 (3.32703)	
+[2024-09-05 14:12:00,577][train_realnet.py][line: 264][    INFO] Epoch: [127/1000]	Iter: [11600/92000]	Loss 3.58585 (3.45028)	
+[2024-09-05 14:12:22,219][train_realnet.py][line: 264][    INFO] Epoch: [127/1000]	Iter: [11620/92000]	Loss 3.30979 (3.32320)	
+[2024-09-05 14:12:43,238][train_realnet.py][line: 264][    INFO] Epoch: [127/1000]	Iter: [11640/92000]	Loss 3.40883 (3.21362)	
+[2024-09-05 14:13:05,922][train_realnet.py][line: 264][    INFO] Epoch: [127/1000]	Iter: [11660/92000]	Loss 3.16518 (3.35530)	
+[2024-09-05 14:13:26,971][train_realnet.py][line: 264][    INFO] Epoch: [127/1000]	Iter: [11680/92000]	Loss 3.17949 (3.29606)	
+[2024-09-05 14:13:53,093][train_realnet.py][line: 264][    INFO] Epoch: [128/1000]	Iter: [11700/92000]	Loss 3.59170 (3.25473)	
+[2024-09-05 14:14:14,435][train_realnet.py][line: 264][    INFO] Epoch: [128/1000]	Iter: [11720/92000]	Loss 3.15580 (3.25851)	
+[2024-09-05 14:14:35,901][train_realnet.py][line: 264][    INFO] Epoch: [128/1000]	Iter: [11740/92000]	Loss 3.39698 (3.30057)	
+[2024-09-05 14:14:57,312][train_realnet.py][line: 264][    INFO] Epoch: [128/1000]	Iter: [11760/92000]	Loss 3.10526 (3.35718)	
+[2024-09-05 14:15:23,500][train_realnet.py][line: 264][    INFO] Epoch: [129/1000]	Iter: [11780/92000]	Loss 3.50501 (3.36448)	
+[2024-09-05 14:15:44,449][train_realnet.py][line: 264][    INFO] Epoch: [129/1000]	Iter: [11800/92000]	Loss 3.23240 (3.29270)	
+[2024-09-05 14:16:06,267][train_realnet.py][line: 264][    INFO] Epoch: [129/1000]	Iter: [11820/92000]	Loss 3.50663 (3.25412)	
+[2024-09-05 14:16:27,332][train_realnet.py][line: 264][    INFO] Epoch: [129/1000]	Iter: [11840/92000]	Loss 3.39063 (3.25926)	
+[2024-09-05 14:16:49,242][train_realnet.py][line: 264][    INFO] Epoch: [129/1000]	Iter: [11860/92000]	Loss 3.26419 (3.35516)	
+[2024-09-05 14:17:15,160][train_realnet.py][line: 264][    INFO] Epoch: [130/1000]	Iter: [11880/92000]	Loss 3.30063 (3.27218)	
+[2024-09-05 14:17:37,366][train_realnet.py][line: 264][    INFO] Epoch: [130/1000]	Iter: [11900/92000]	Loss 3.38935 (3.30170)	
+[2024-09-05 14:17:58,527][train_realnet.py][line: 264][    INFO] Epoch: [130/1000]	Iter: [11920/92000]	Loss 3.07873 (3.19274)	
+[2024-09-05 14:18:19,418][train_realnet.py][line: 264][    INFO] Epoch: [130/1000]	Iter: [11940/92000]	Loss 3.17628 (3.31883)	
+[2024-09-05 14:18:40,265][train_realnet.py][line: 264][    INFO] Epoch: [130/1000]	Iter: [11960/92000]	Loss 3.38501 (3.33427)	
+[2024-09-05 14:18:57,112][train_realnet.py][line: 320][    INFO]  * Loss 0.00589
+[2024-09-05 14:19:11,617][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.620917 | 0.727972 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 14:19:37,078][train_realnet.py][line: 264][    INFO] Epoch: [131/1000]	Iter: [11980/92000]	Loss 3.14897 (3.25613)	
+[2024-09-05 14:19:58,764][train_realnet.py][line: 264][    INFO] Epoch: [131/1000]	Iter: [12000/92000]	Loss 3.31149 (3.25604)	
+[2024-09-05 14:20:20,457][train_realnet.py][line: 264][    INFO] Epoch: [131/1000]	Iter: [12020/92000]	Loss 3.12752 (3.28741)	
+[2024-09-05 14:20:42,679][train_realnet.py][line: 264][    INFO] Epoch: [131/1000]	Iter: [12040/92000]	Loss 3.29323 (3.24759)	
+[2024-09-05 14:21:07,890][train_realnet.py][line: 264][    INFO] Epoch: [132/1000]	Iter: [12060/92000]	Loss 3.40471 (3.30376)	
+[2024-09-05 14:21:29,463][train_realnet.py][line: 264][    INFO] Epoch: [132/1000]	Iter: [12080/92000]	Loss 3.12711 (3.29832)	
+[2024-09-05 14:21:51,276][train_realnet.py][line: 264][    INFO] Epoch: [132/1000]	Iter: [12100/92000]	Loss 3.28425 (3.27885)	
+[2024-09-05 14:22:12,617][train_realnet.py][line: 264][    INFO] Epoch: [132/1000]	Iter: [12120/92000]	Loss 3.13520 (3.27466)	
+[2024-09-05 14:22:34,470][train_realnet.py][line: 264][    INFO] Epoch: [132/1000]	Iter: [12140/92000]	Loss 3.09927 (3.28085)	
+[2024-09-05 14:23:01,377][train_realnet.py][line: 264][    INFO] Epoch: [133/1000]	Iter: [12160/92000]	Loss 3.35976 (3.25434)	
+[2024-09-05 14:23:23,339][train_realnet.py][line: 264][    INFO] Epoch: [133/1000]	Iter: [12180/92000]	Loss 3.33549 (3.26179)	
+[2024-09-05 14:23:44,775][train_realnet.py][line: 264][    INFO] Epoch: [133/1000]	Iter: [12200/92000]	Loss 2.94938 (3.28802)	
+[2024-09-05 14:24:05,513][train_realnet.py][line: 264][    INFO] Epoch: [133/1000]	Iter: [12220/92000]	Loss 3.06760 (3.24677)	
+[2024-09-05 14:24:31,105][train_realnet.py][line: 264][    INFO] Epoch: [134/1000]	Iter: [12240/92000]	Loss 3.08030 (3.11461)	
+[2024-09-05 14:24:51,904][train_realnet.py][line: 264][    INFO] Epoch: [134/1000]	Iter: [12260/92000]	Loss 3.48793 (3.30820)	
+[2024-09-05 14:25:13,362][train_realnet.py][line: 264][    INFO] Epoch: [134/1000]	Iter: [12280/92000]	Loss 3.18875 (3.34719)	
+[2024-09-05 14:25:34,871][train_realnet.py][line: 264][    INFO] Epoch: [134/1000]	Iter: [12300/92000]	Loss 3.57884 (3.25935)	
+[2024-09-05 14:25:57,227][train_realnet.py][line: 264][    INFO] Epoch: [134/1000]	Iter: [12320/92000]	Loss 3.13442 (3.23292)	
+[2024-09-05 14:26:22,867][train_realnet.py][line: 264][    INFO] Epoch: [135/1000]	Iter: [12340/92000]	Loss 3.17441 (3.21247)	
+[2024-09-05 14:26:44,707][train_realnet.py][line: 264][    INFO] Epoch: [135/1000]	Iter: [12360/92000]	Loss 3.22180 (3.20328)	
+[2024-09-05 14:27:06,707][train_realnet.py][line: 264][    INFO] Epoch: [135/1000]	Iter: [12380/92000]	Loss 3.00366 (3.25258)	
+[2024-09-05 14:27:28,097][train_realnet.py][line: 264][    INFO] Epoch: [135/1000]	Iter: [12400/92000]	Loss 3.37525 (3.25653)	
+[2024-09-05 14:27:48,846][train_realnet.py][line: 264][    INFO] Epoch: [135/1000]	Iter: [12420/92000]	Loss 2.97799 (3.25711)	
+[2024-09-05 14:28:04,811][train_realnet.py][line: 320][    INFO]  * Loss 0.00616
+[2024-09-05 15:38:14,672][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.593139 | 0.702157 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 15:38:38,831][train_realnet.py][line: 264][    INFO] Epoch: [136/1000]	Iter: [12440/92000]	Loss 3.61308 (3.28700)	
+[2024-09-05 15:38:58,184][train_realnet.py][line: 264][    INFO] Epoch: [136/1000]	Iter: [12460/92000]	Loss 3.32026 (3.28684)	
+[2024-09-05 15:39:17,764][train_realnet.py][line: 264][    INFO] Epoch: [136/1000]	Iter: [12480/92000]	Loss 3.51387 (3.21745)	
+[2024-09-05 15:39:37,316][train_realnet.py][line: 264][    INFO] Epoch: [136/1000]	Iter: [12500/92000]	Loss 3.40291 (3.22733)	
+[2024-09-05 15:40:01,913][train_realnet.py][line: 264][    INFO] Epoch: [137/1000]	Iter: [12520/92000]	Loss 3.37960 (3.38121)	
+[2024-09-05 15:40:21,888][train_realnet.py][line: 264][    INFO] Epoch: [137/1000]	Iter: [12540/92000]	Loss 3.32101 (3.19200)	
+[2024-09-05 15:40:42,364][train_realnet.py][line: 264][    INFO] Epoch: [137/1000]	Iter: [12560/92000]	Loss 3.17524 (3.26891)	
+[2024-09-05 15:41:02,609][train_realnet.py][line: 264][    INFO] Epoch: [137/1000]	Iter: [12580/92000]	Loss 3.34127 (3.20181)	
+[2024-09-05 15:41:22,831][train_realnet.py][line: 264][    INFO] Epoch: [137/1000]	Iter: [12600/92000]	Loss 3.46444 (3.24907)	
+[2024-09-05 15:41:49,403][train_realnet.py][line: 264][    INFO] Epoch: [138/1000]	Iter: [12620/92000]	Loss 3.20278 (3.31061)	
+[2024-09-05 15:42:10,123][train_realnet.py][line: 264][    INFO] Epoch: [138/1000]	Iter: [12640/92000]	Loss 3.23291 (3.29227)	
+[2024-09-05 15:42:30,732][train_realnet.py][line: 264][    INFO] Epoch: [138/1000]	Iter: [12660/92000]	Loss 3.37528 (3.22031)	
+[2024-09-05 15:42:51,702][train_realnet.py][line: 264][    INFO] Epoch: [138/1000]	Iter: [12680/92000]	Loss 3.29391 (3.25414)	
+[2024-09-05 15:43:17,105][train_realnet.py][line: 264][    INFO] Epoch: [139/1000]	Iter: [12700/92000]	Loss 3.37065 (3.31125)	
+[2024-09-05 15:43:37,549][train_realnet.py][line: 264][    INFO] Epoch: [139/1000]	Iter: [12720/92000]	Loss 3.11074 (3.21245)	
+[2024-09-05 15:43:58,675][train_realnet.py][line: 264][    INFO] Epoch: [139/1000]	Iter: [12740/92000]	Loss 3.26411 (3.31737)	
+[2024-09-05 15:44:19,247][train_realnet.py][line: 264][    INFO] Epoch: [139/1000]	Iter: [12760/92000]	Loss 3.20915 (3.23398)	
+[2024-09-05 15:44:40,593][train_realnet.py][line: 264][    INFO] Epoch: [139/1000]	Iter: [12780/92000]	Loss 3.29271 (3.23352)	
+[2024-09-05 15:45:05,967][train_realnet.py][line: 264][    INFO] Epoch: [140/1000]	Iter: [12800/92000]	Loss 3.02383 (3.18670)	
+[2024-09-05 15:45:26,930][train_realnet.py][line: 264][    INFO] Epoch: [140/1000]	Iter: [12820/92000]	Loss 3.61971 (3.25940)	
+[2024-09-05 15:45:48,277][train_realnet.py][line: 264][    INFO] Epoch: [140/1000]	Iter: [12840/92000]	Loss 3.21875 (3.20689)	
+[2024-09-05 15:46:09,163][train_realnet.py][line: 264][    INFO] Epoch: [140/1000]	Iter: [12860/92000]	Loss 3.01929 (3.29171)	
+[2024-09-05 15:46:29,889][train_realnet.py][line: 264][    INFO] Epoch: [140/1000]	Iter: [12880/92000]	Loss 3.49211 (3.22685)	
+[2024-09-05 15:46:46,489][train_realnet.py][line: 320][    INFO]  * Loss 0.00620
+[2024-09-05 15:47:01,219][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.639361 | 0.717107 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 15:47:26,784][train_realnet.py][line: 264][    INFO] Epoch: [141/1000]	Iter: [12900/92000]	Loss 3.00843 (3.20717)	
+[2024-09-05 15:47:47,353][train_realnet.py][line: 264][    INFO] Epoch: [141/1000]	Iter: [12920/92000]	Loss 3.13034 (3.29128)	
+[2024-09-05 15:48:08,571][train_realnet.py][line: 264][    INFO] Epoch: [141/1000]	Iter: [12940/92000]	Loss 3.30302 (3.25628)	
+[2024-09-05 15:48:30,541][train_realnet.py][line: 264][    INFO] Epoch: [141/1000]	Iter: [12960/92000]	Loss 3.04929 (3.20151)	
+[2024-09-05 15:48:55,957][train_realnet.py][line: 264][    INFO] Epoch: [142/1000]	Iter: [12980/92000]	Loss 3.10485 (3.16898)	
+[2024-09-05 15:49:17,147][train_realnet.py][line: 264][    INFO] Epoch: [142/1000]	Iter: [13000/92000]	Loss 2.97885 (3.19900)	
+[2024-09-05 15:49:38,419][train_realnet.py][line: 264][    INFO] Epoch: [142/1000]	Iter: [13020/92000]	Loss 3.12743 (3.28642)	
+[2024-09-05 15:50:00,394][train_realnet.py][line: 264][    INFO] Epoch: [142/1000]	Iter: [13040/92000]	Loss 3.23284 (3.20592)	
+[2024-09-05 15:50:20,997][train_realnet.py][line: 264][    INFO] Epoch: [142/1000]	Iter: [13060/92000]	Loss 3.37459 (3.27674)	
+[2024-09-05 15:50:47,184][train_realnet.py][line: 264][    INFO] Epoch: [143/1000]	Iter: [13080/92000]	Loss 3.37515 (3.24663)	
+[2024-09-05 15:51:08,578][train_realnet.py][line: 264][    INFO] Epoch: [143/1000]	Iter: [13100/92000]	Loss 3.46465 (3.23511)	
+[2024-09-05 15:51:30,483][train_realnet.py][line: 264][    INFO] Epoch: [143/1000]	Iter: [13120/92000]	Loss 3.00199 (3.19145)	
+[2024-09-05 15:51:51,203][train_realnet.py][line: 264][    INFO] Epoch: [143/1000]	Iter: [13140/92000]	Loss 3.20185 (3.17644)	
+[2024-09-05 15:52:16,392][train_realnet.py][line: 264][    INFO] Epoch: [144/1000]	Iter: [13160/92000]	Loss 3.07269 (3.29589)	
+[2024-09-05 15:52:37,195][train_realnet.py][line: 264][    INFO] Epoch: [144/1000]	Iter: [13180/92000]	Loss 3.08706 (3.19881)	
+[2024-09-05 15:52:58,521][train_realnet.py][line: 264][    INFO] Epoch: [144/1000]	Iter: [13200/92000]	Loss 3.01876 (3.16900)	
+[2024-09-05 15:53:20,270][train_realnet.py][line: 264][    INFO] Epoch: [144/1000]	Iter: [13220/92000]	Loss 3.11438 (3.26195)	
+[2024-09-05 15:53:41,146][train_realnet.py][line: 264][    INFO] Epoch: [144/1000]	Iter: [13240/92000]	Loss 3.39429 (3.18709)	
+[2024-09-05 15:54:06,435][train_realnet.py][line: 264][    INFO] Epoch: [145/1000]	Iter: [13260/92000]	Loss 3.04719 (3.17340)	
+[2024-09-05 15:54:28,071][train_realnet.py][line: 264][    INFO] Epoch: [145/1000]	Iter: [13280/92000]	Loss 3.20428 (3.20004)	
+[2024-09-05 15:54:49,310][train_realnet.py][line: 264][    INFO] Epoch: [145/1000]	Iter: [13300/92000]	Loss 3.07367 (3.20463)	
+[2024-09-05 15:55:11,144][train_realnet.py][line: 264][    INFO] Epoch: [145/1000]	Iter: [13320/92000]	Loss 3.36773 (3.16026)	
+[2024-09-05 15:55:31,991][train_realnet.py][line: 264][    INFO] Epoch: [145/1000]	Iter: [13340/92000]	Loss 3.09823 (3.24261)	
+[2024-09-05 15:55:48,244][train_realnet.py][line: 320][    INFO]  * Loss 0.00602
+[2024-09-05 15:56:02,858][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.639778 | 0.719713 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 15:56:28,838][train_realnet.py][line: 264][    INFO] Epoch: [146/1000]	Iter: [13360/92000]	Loss 2.87549 (3.19041)	
+[2024-09-05 15:56:50,194][train_realnet.py][line: 264][    INFO] Epoch: [146/1000]	Iter: [13380/92000]	Loss 3.23313 (3.16821)	
+[2024-09-05 15:57:12,251][train_realnet.py][line: 264][    INFO] Epoch: [146/1000]	Iter: [13400/92000]	Loss 3.25543 (3.24210)	
+[2024-09-05 15:57:34,503][train_realnet.py][line: 264][    INFO] Epoch: [146/1000]	Iter: [13420/92000]	Loss 3.48393 (3.13936)	
+[2024-09-05 15:58:00,680][train_realnet.py][line: 264][    INFO] Epoch: [147/1000]	Iter: [13440/92000]	Loss 3.61695 (3.25300)	
+[2024-09-05 15:58:22,111][train_realnet.py][line: 264][    INFO] Epoch: [147/1000]	Iter: [13460/92000]	Loss 3.09934 (3.21940)	
+[2024-09-05 15:58:43,771][train_realnet.py][line: 264][    INFO] Epoch: [147/1000]	Iter: [13480/92000]	Loss 3.01612 (3.16769)	
+[2024-09-05 15:59:04,995][train_realnet.py][line: 264][    INFO] Epoch: [147/1000]	Iter: [13500/92000]	Loss 2.99159 (3.16783)	
+[2024-09-05 15:59:26,416][train_realnet.py][line: 264][    INFO] Epoch: [147/1000]	Iter: [13520/92000]	Loss 3.32790 (3.11163)	
+[2024-09-05 15:59:51,990][train_realnet.py][line: 264][    INFO] Epoch: [148/1000]	Iter: [13540/92000]	Loss 3.39847 (3.13056)	
+[2024-09-05 16:00:13,193][train_realnet.py][line: 264][    INFO] Epoch: [148/1000]	Iter: [13560/92000]	Loss 2.98499 (3.21030)	
+[2024-09-05 16:00:34,185][train_realnet.py][line: 264][    INFO] Epoch: [148/1000]	Iter: [13580/92000]	Loss 3.32747 (3.24368)	
+[2024-09-05 16:00:55,091][train_realnet.py][line: 264][    INFO] Epoch: [148/1000]	Iter: [13600/92000]	Loss 3.07280 (3.20198)	
+[2024-09-05 16:01:20,753][train_realnet.py][line: 264][    INFO] Epoch: [149/1000]	Iter: [13620/92000]	Loss 3.24616 (3.26428)	
+[2024-09-05 16:01:42,360][train_realnet.py][line: 264][    INFO] Epoch: [149/1000]	Iter: [13640/92000]	Loss 2.99031 (3.19292)	
+[2024-09-05 16:02:03,414][train_realnet.py][line: 264][    INFO] Epoch: [149/1000]	Iter: [13660/92000]	Loss 3.03439 (3.17272)	
+[2024-09-05 16:02:25,627][train_realnet.py][line: 264][    INFO] Epoch: [149/1000]	Iter: [13680/92000]	Loss 3.21440 (3.16594)	
+[2024-09-05 16:02:47,983][train_realnet.py][line: 264][    INFO] Epoch: [149/1000]	Iter: [13700/92000]	Loss 3.18993 (3.20099)	
+[2024-09-05 16:03:13,194][train_realnet.py][line: 264][    INFO] Epoch: [150/1000]	Iter: [13720/92000]	Loss 2.96850 (3.07118)	
+[2024-09-05 16:03:34,702][train_realnet.py][line: 264][    INFO] Epoch: [150/1000]	Iter: [13740/92000]	Loss 3.15624 (3.14924)	
+[2024-09-05 16:03:56,198][train_realnet.py][line: 264][    INFO] Epoch: [150/1000]	Iter: [13760/92000]	Loss 3.35372 (3.16281)	
+[2024-09-05 16:04:17,441][train_realnet.py][line: 264][    INFO] Epoch: [150/1000]	Iter: [13780/92000]	Loss 2.97846 (3.19237)	
+[2024-09-05 16:04:38,949][train_realnet.py][line: 264][    INFO] Epoch: [150/1000]	Iter: [13800/92000]	Loss 2.95568 (3.07629)	
+[2024-09-05 16:04:55,174][train_realnet.py][line: 320][    INFO]  * Loss 0.00626
+[2024-09-05 16:05:10,077][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.621639 | 0.715651 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 16:05:36,694][train_realnet.py][line: 264][    INFO] Epoch: [151/1000]	Iter: [13820/92000]	Loss 2.92062 (3.14971)	
+[2024-09-05 16:05:58,530][train_realnet.py][line: 264][    INFO] Epoch: [151/1000]	Iter: [13840/92000]	Loss 3.62164 (3.17323)	
+[2024-09-05 16:06:19,987][train_realnet.py][line: 264][    INFO] Epoch: [151/1000]	Iter: [13860/92000]	Loss 3.29035 (3.14043)	
+[2024-09-05 16:06:41,441][train_realnet.py][line: 264][    INFO] Epoch: [151/1000]	Iter: [13880/92000]	Loss 3.24290 (3.15772)	
+[2024-09-05 16:07:07,101][train_realnet.py][line: 264][    INFO] Epoch: [152/1000]	Iter: [13900/92000]	Loss 3.38239 (3.23761)	
+[2024-09-05 16:07:28,406][train_realnet.py][line: 264][    INFO] Epoch: [152/1000]	Iter: [13920/92000]	Loss 3.12410 (3.14055)	
+[2024-09-05 16:07:50,053][train_realnet.py][line: 264][    INFO] Epoch: [152/1000]	Iter: [13940/92000]	Loss 2.93538 (3.17018)	
+[2024-09-05 16:08:11,530][train_realnet.py][line: 264][    INFO] Epoch: [152/1000]	Iter: [13960/92000]	Loss 3.20670 (3.09715)	
+[2024-09-05 16:08:33,758][train_realnet.py][line: 264][    INFO] Epoch: [152/1000]	Iter: [13980/92000]	Loss 2.84812 (3.21613)	
+[2024-09-05 16:08:59,182][train_realnet.py][line: 264][    INFO] Epoch: [153/1000]	Iter: [14000/92000]	Loss 3.12675 (3.19508)	
+[2024-09-05 16:09:20,495][train_realnet.py][line: 264][    INFO] Epoch: [153/1000]	Iter: [14020/92000]	Loss 3.17086 (3.14341)	
+[2024-09-05 16:09:41,550][train_realnet.py][line: 264][    INFO] Epoch: [153/1000]	Iter: [14040/92000]	Loss 3.36428 (3.08562)	
+[2024-09-05 16:10:02,875][train_realnet.py][line: 264][    INFO] Epoch: [153/1000]	Iter: [14060/92000]	Loss 2.89873 (3.12428)	
+[2024-09-05 16:10:28,840][train_realnet.py][line: 264][    INFO] Epoch: [154/1000]	Iter: [14080/92000]	Loss 2.98090 (3.04693)	
+[2024-09-05 16:10:50,221][train_realnet.py][line: 264][    INFO] Epoch: [154/1000]	Iter: [14100/92000]	Loss 3.15413 (3.22172)	
+[2024-09-05 16:11:11,372][train_realnet.py][line: 264][    INFO] Epoch: [154/1000]	Iter: [14120/92000]	Loss 3.21087 (3.19253)	
+[2024-09-05 16:11:33,405][train_realnet.py][line: 264][    INFO] Epoch: [154/1000]	Iter: [14140/92000]	Loss 3.03646 (3.15101)	
+[2024-09-05 16:11:54,986][train_realnet.py][line: 264][    INFO] Epoch: [154/1000]	Iter: [14160/92000]	Loss 3.45004 (3.10818)	
+[2024-09-05 16:12:20,536][train_realnet.py][line: 264][    INFO] Epoch: [155/1000]	Iter: [14180/92000]	Loss 2.93170 (3.10332)	
+[2024-09-05 16:12:41,782][train_realnet.py][line: 264][    INFO] Epoch: [155/1000]	Iter: [14200/92000]	Loss 3.08019 (3.13742)	
+[2024-09-05 16:13:02,524][train_realnet.py][line: 264][    INFO] Epoch: [155/1000]	Iter: [14220/92000]	Loss 3.32913 (3.16079)	
+[2024-09-05 16:13:24,351][train_realnet.py][line: 264][    INFO] Epoch: [155/1000]	Iter: [14240/92000]	Loss 2.98806 (3.12883)	
+[2024-09-05 16:13:45,172][train_realnet.py][line: 264][    INFO] Epoch: [155/1000]	Iter: [14260/92000]	Loss 2.85252 (3.05461)	
+[2024-09-05 16:14:01,833][train_realnet.py][line: 320][    INFO]  * Loss 0.00637
+[2024-09-05 16:14:16,843][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.590056 | 0.71347  |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 16:14:42,226][train_realnet.py][line: 264][    INFO] Epoch: [156/1000]	Iter: [14280/92000]	Loss 3.11973 (3.15736)	
+[2024-09-05 16:15:03,561][train_realnet.py][line: 264][    INFO] Epoch: [156/1000]	Iter: [14300/92000]	Loss 3.24176 (3.16421)	
+[2024-09-05 16:15:24,742][train_realnet.py][line: 264][    INFO] Epoch: [156/1000]	Iter: [14320/92000]	Loss 3.14806 (3.19817)	
+[2024-09-05 16:15:45,388][train_realnet.py][line: 264][    INFO] Epoch: [156/1000]	Iter: [14340/92000]	Loss 3.15918 (3.12699)	
+[2024-09-05 16:16:11,659][train_realnet.py][line: 264][    INFO] Epoch: [157/1000]	Iter: [14360/92000]	Loss 3.03545 (3.11382)	
+[2024-09-05 16:16:32,840][train_realnet.py][line: 264][    INFO] Epoch: [157/1000]	Iter: [14380/92000]	Loss 3.39869 (3.10077)	
+[2024-09-05 16:16:53,578][train_realnet.py][line: 264][    INFO] Epoch: [157/1000]	Iter: [14400/92000]	Loss 3.05987 (3.13374)	
+[2024-09-05 16:17:14,985][train_realnet.py][line: 264][    INFO] Epoch: [157/1000]	Iter: [14420/92000]	Loss 3.17947 (3.18661)	
+[2024-09-05 16:17:36,910][train_realnet.py][line: 264][    INFO] Epoch: [157/1000]	Iter: [14440/92000]	Loss 3.05248 (3.24053)	
+[2024-09-05 16:18:02,339][train_realnet.py][line: 264][    INFO] Epoch: [158/1000]	Iter: [14460/92000]	Loss 3.41957 (3.13391)	
+[2024-09-05 16:18:23,022][train_realnet.py][line: 264][    INFO] Epoch: [158/1000]	Iter: [14480/92000]	Loss 2.93627 (3.08909)	
+[2024-09-05 16:18:44,646][train_realnet.py][line: 264][    INFO] Epoch: [158/1000]	Iter: [14500/92000]	Loss 3.02408 (3.14653)	
+[2024-09-05 16:19:05,877][train_realnet.py][line: 264][    INFO] Epoch: [158/1000]	Iter: [14520/92000]	Loss 3.14852 (3.13348)	
+[2024-09-05 16:19:31,546][train_realnet.py][line: 264][    INFO] Epoch: [159/1000]	Iter: [14540/92000]	Loss 3.05362 (3.23121)	
+[2024-09-05 16:19:52,828][train_realnet.py][line: 264][    INFO] Epoch: [159/1000]	Iter: [14560/92000]	Loss 3.16728 (3.20850)	
+[2024-09-05 16:20:14,122][train_realnet.py][line: 264][    INFO] Epoch: [159/1000]	Iter: [14580/92000]	Loss 3.16771 (3.09355)	
+[2024-09-05 16:20:35,212][train_realnet.py][line: 264][    INFO] Epoch: [159/1000]	Iter: [14600/92000]	Loss 3.01810 (3.09676)	
+[2024-09-05 16:20:55,915][train_realnet.py][line: 264][    INFO] Epoch: [159/1000]	Iter: [14620/92000]	Loss 3.02661 (3.14510)	
+[2024-09-05 16:21:21,774][train_realnet.py][line: 264][    INFO] Epoch: [160/1000]	Iter: [14640/92000]	Loss 3.04202 (3.07479)	
+[2024-09-05 16:21:43,521][train_realnet.py][line: 264][    INFO] Epoch: [160/1000]	Iter: [14660/92000]	Loss 3.21753 (3.21142)	
+[2024-09-05 16:22:04,403][train_realnet.py][line: 264][    INFO] Epoch: [160/1000]	Iter: [14680/92000]	Loss 3.09407 (3.06496)	
+[2024-09-05 16:22:25,526][train_realnet.py][line: 264][    INFO] Epoch: [160/1000]	Iter: [14700/92000]	Loss 3.31308 (3.17839)	
+[2024-09-05 16:22:46,261][train_realnet.py][line: 264][    INFO] Epoch: [160/1000]	Iter: [14720/92000]	Loss 2.93561 (3.10919)	
+[2024-09-05 16:23:02,911][train_realnet.py][line: 320][    INFO]  * Loss 0.00604
+[2024-09-05 16:23:17,662][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.615722 | 0.710825 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 16:23:43,183][train_realnet.py][line: 264][    INFO] Epoch: [161/1000]	Iter: [14740/92000]	Loss 3.31626 (3.13020)	
+[2024-09-05 16:24:04,093][train_realnet.py][line: 264][    INFO] Epoch: [161/1000]	Iter: [14760/92000]	Loss 3.21373 (3.07682)	
+[2024-09-05 16:24:25,498][train_realnet.py][line: 264][    INFO] Epoch: [161/1000]	Iter: [14780/92000]	Loss 3.03472 (3.11720)	
+[2024-09-05 16:24:46,977][train_realnet.py][line: 264][    INFO] Epoch: [161/1000]	Iter: [14800/92000]	Loss 3.04133 (3.14575)	
+[2024-09-05 16:25:12,613][train_realnet.py][line: 264][    INFO] Epoch: [162/1000]	Iter: [14820/92000]	Loss 2.92186 (3.03336)	
+[2024-09-05 16:25:34,503][train_realnet.py][line: 264][    INFO] Epoch: [162/1000]	Iter: [14840/92000]	Loss 3.35003 (3.14437)	
+[2024-09-05 16:25:56,442][train_realnet.py][line: 264][    INFO] Epoch: [162/1000]	Iter: [14860/92000]	Loss 3.20752 (3.11692)	
+[2024-09-05 16:26:17,970][train_realnet.py][line: 264][    INFO] Epoch: [162/1000]	Iter: [14880/92000]	Loss 3.15478 (3.07357)	
+[2024-09-05 16:26:39,039][train_realnet.py][line: 264][    INFO] Epoch: [162/1000]	Iter: [14900/92000]	Loss 3.12388 (3.09996)	
+[2024-09-05 16:27:05,527][train_realnet.py][line: 264][    INFO] Epoch: [163/1000]	Iter: [14920/92000]	Loss 3.15877 (3.20433)	
+[2024-09-05 16:27:26,342][train_realnet.py][line: 264][    INFO] Epoch: [163/1000]	Iter: [14940/92000]	Loss 2.81715 (3.12030)	
+[2024-09-05 16:27:47,976][train_realnet.py][line: 264][    INFO] Epoch: [163/1000]	Iter: [14960/92000]	Loss 3.19769 (3.16246)	
+[2024-09-05 16:28:09,346][train_realnet.py][line: 264][    INFO] Epoch: [163/1000]	Iter: [14980/92000]	Loss 3.30297 (3.19778)	
+[2024-09-05 16:28:35,264][train_realnet.py][line: 264][    INFO] Epoch: [164/1000]	Iter: [15000/92000]	Loss 3.04872 (3.06902)	
+[2024-09-05 16:28:56,040][train_realnet.py][line: 264][    INFO] Epoch: [164/1000]	Iter: [15020/92000]	Loss 2.95812 (3.10523)	
+[2024-09-05 16:29:17,396][train_realnet.py][line: 264][    INFO] Epoch: [164/1000]	Iter: [15040/92000]	Loss 3.20819 (3.04819)	
+[2024-09-05 16:29:38,679][train_realnet.py][line: 264][    INFO] Epoch: [164/1000]	Iter: [15060/92000]	Loss 2.96335 (3.15153)	
+[2024-09-05 16:29:59,855][train_realnet.py][line: 264][    INFO] Epoch: [164/1000]	Iter: [15080/92000]	Loss 3.34464 (3.11636)	
+[2024-09-05 16:30:25,063][train_realnet.py][line: 264][    INFO] Epoch: [165/1000]	Iter: [15100/92000]	Loss 2.89293 (3.07314)	
+[2024-09-05 16:30:46,338][train_realnet.py][line: 264][    INFO] Epoch: [165/1000]	Iter: [15120/92000]	Loss 3.16188 (3.09876)	
+[2024-09-05 16:31:08,847][train_realnet.py][line: 264][    INFO] Epoch: [165/1000]	Iter: [15140/92000]	Loss 3.32896 (3.22082)	
+[2024-09-05 16:31:29,774][train_realnet.py][line: 264][    INFO] Epoch: [165/1000]	Iter: [15160/92000]	Loss 3.61255 (3.08949)	
+[2024-09-05 16:31:50,045][train_realnet.py][line: 264][    INFO] Epoch: [165/1000]	Iter: [15180/92000]	Loss 3.03573 (3.07544)	
+[2024-09-05 16:32:06,502][train_realnet.py][line: 320][    INFO]  * Loss 0.00669
+[2024-09-05 16:32:21,070][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.603222 | 0.713494 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 16:32:47,559][train_realnet.py][line: 264][    INFO] Epoch: [166/1000]	Iter: [15200/92000]	Loss 2.92169 (3.13929)	
+[2024-09-05 16:33:08,428][train_realnet.py][line: 264][    INFO] Epoch: [166/1000]	Iter: [15220/92000]	Loss 3.17363 (3.09634)	
+[2024-09-05 16:33:29,450][train_realnet.py][line: 264][    INFO] Epoch: [166/1000]	Iter: [15240/92000]	Loss 3.31838 (3.12855)	
+[2024-09-05 16:33:50,689][train_realnet.py][line: 264][    INFO] Epoch: [166/1000]	Iter: [15260/92000]	Loss 3.18191 (3.04920)	
+[2024-09-05 16:34:16,037][train_realnet.py][line: 264][    INFO] Epoch: [167/1000]	Iter: [15280/92000]	Loss 3.23020 (3.15204)	
+[2024-09-05 16:34:36,792][train_realnet.py][line: 264][    INFO] Epoch: [167/1000]	Iter: [15300/92000]	Loss 3.12660 (3.11085)	
+[2024-09-05 16:34:57,567][train_realnet.py][line: 264][    INFO] Epoch: [167/1000]	Iter: [15320/92000]	Loss 3.04598 (3.10607)	
+[2024-09-05 16:35:19,374][train_realnet.py][line: 264][    INFO] Epoch: [167/1000]	Iter: [15340/92000]	Loss 3.02218 (3.14113)	
+[2024-09-05 16:35:41,415][train_realnet.py][line: 264][    INFO] Epoch: [167/1000]	Iter: [15360/92000]	Loss 2.78274 (3.11176)	
+[2024-09-05 16:36:07,012][train_realnet.py][line: 264][    INFO] Epoch: [168/1000]	Iter: [15380/92000]	Loss 3.13928 (3.08433)	
+[2024-09-05 16:36:28,106][train_realnet.py][line: 264][    INFO] Epoch: [168/1000]	Iter: [15400/92000]	Loss 3.38318 (3.19394)	
+[2024-09-05 16:36:50,146][train_realnet.py][line: 264][    INFO] Epoch: [168/1000]	Iter: [15420/92000]	Loss 3.08568 (3.13210)	
+[2024-09-05 16:37:11,015][train_realnet.py][line: 264][    INFO] Epoch: [168/1000]	Iter: [15440/92000]	Loss 3.09929 (3.08690)	
+[2024-09-05 16:37:35,968][train_realnet.py][line: 264][    INFO] Epoch: [169/1000]	Iter: [15460/92000]	Loss 3.08381 (3.11787)	
+[2024-09-05 16:37:57,751][train_realnet.py][line: 264][    INFO] Epoch: [169/1000]	Iter: [15480/92000]	Loss 2.83186 (3.07244)	
+[2024-09-05 16:38:18,985][train_realnet.py][line: 264][    INFO] Epoch: [169/1000]	Iter: [15500/92000]	Loss 3.17281 (3.03524)	
+[2024-09-05 16:38:39,712][train_realnet.py][line: 264][    INFO] Epoch: [169/1000]	Iter: [15520/92000]	Loss 3.07414 (3.08622)	
+[2024-09-05 16:39:00,752][train_realnet.py][line: 264][    INFO] Epoch: [169/1000]	Iter: [15540/92000]	Loss 3.27096 (3.11777)	
+[2024-09-05 16:39:26,941][train_realnet.py][line: 264][    INFO] Epoch: [170/1000]	Iter: [15560/92000]	Loss 3.16473 (3.09454)	
+[2024-09-05 16:39:48,711][train_realnet.py][line: 264][    INFO] Epoch: [170/1000]	Iter: [15580/92000]	Loss 2.87708 (3.09527)	
+[2024-09-05 16:40:09,943][train_realnet.py][line: 264][    INFO] Epoch: [170/1000]	Iter: [15600/92000]	Loss 3.12313 (3.04413)	
+[2024-09-05 16:40:31,613][train_realnet.py][line: 264][    INFO] Epoch: [170/1000]	Iter: [15620/92000]	Loss 3.00757 (3.05010)	
+[2024-09-05 16:40:52,120][train_realnet.py][line: 264][    INFO] Epoch: [170/1000]	Iter: [15640/92000]	Loss 2.87918 (3.05887)	
+[2024-09-05 16:41:08,761][train_realnet.py][line: 320][    INFO]  * Loss 0.00504
+[2024-09-05 16:41:23,413][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.642556 | 0.704968 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 16:41:48,653][train_realnet.py][line: 264][    INFO] Epoch: [171/1000]	Iter: [15660/92000]	Loss 3.10389 (3.09402)	
+[2024-09-05 16:42:10,105][train_realnet.py][line: 264][    INFO] Epoch: [171/1000]	Iter: [15680/92000]	Loss 3.41574 (3.08686)	
+[2024-09-05 16:42:33,135][train_realnet.py][line: 264][    INFO] Epoch: [171/1000]	Iter: [15700/92000]	Loss 3.46908 (3.07211)	
+[2024-09-05 16:42:54,803][train_realnet.py][line: 264][    INFO] Epoch: [171/1000]	Iter: [15720/92000]	Loss 3.13491 (3.07735)	
+[2024-09-05 16:43:20,959][train_realnet.py][line: 264][    INFO] Epoch: [172/1000]	Iter: [15740/92000]	Loss 3.03952 (3.05715)	
+[2024-09-05 16:43:42,166][train_realnet.py][line: 264][    INFO] Epoch: [172/1000]	Iter: [15760/92000]	Loss 3.17882 (3.09139)	
+[2024-09-05 16:44:03,174][train_realnet.py][line: 264][    INFO] Epoch: [172/1000]	Iter: [15780/92000]	Loss 3.29612 (3.10012)	
+[2024-09-05 16:44:24,264][train_realnet.py][line: 264][    INFO] Epoch: [172/1000]	Iter: [15800/92000]	Loss 3.20890 (3.06614)	
+[2024-09-05 16:44:45,455][train_realnet.py][line: 264][    INFO] Epoch: [172/1000]	Iter: [15820/92000]	Loss 3.15295 (3.07438)	
+[2024-09-05 16:45:11,358][train_realnet.py][line: 264][    INFO] Epoch: [173/1000]	Iter: [15840/92000]	Loss 3.41634 (3.14386)	
+[2024-09-05 16:45:32,594][train_realnet.py][line: 264][    INFO] Epoch: [173/1000]	Iter: [15860/92000]	Loss 2.97349 (3.11211)	
+[2024-09-05 16:45:54,354][train_realnet.py][line: 264][    INFO] Epoch: [173/1000]	Iter: [15880/92000]	Loss 3.14889 (3.03462)	
+[2024-09-05 16:46:15,518][train_realnet.py][line: 264][    INFO] Epoch: [173/1000]	Iter: [15900/92000]	Loss 3.07485 (3.12361)	
+[2024-09-05 16:46:41,821][train_realnet.py][line: 264][    INFO] Epoch: [174/1000]	Iter: [15920/92000]	Loss 3.15863 (3.04855)	
+[2024-09-05 16:47:03,315][train_realnet.py][line: 264][    INFO] Epoch: [174/1000]	Iter: [15940/92000]	Loss 3.04021 (3.08045)	
+[2024-09-05 16:47:24,397][train_realnet.py][line: 264][    INFO] Epoch: [174/1000]	Iter: [15960/92000]	Loss 2.83029 (3.10337)	
+[2024-09-05 16:47:45,271][train_realnet.py][line: 264][    INFO] Epoch: [174/1000]	Iter: [15980/92000]	Loss 3.18946 (3.16216)	
+[2024-09-05 16:48:05,714][train_realnet.py][line: 264][    INFO] Epoch: [174/1000]	Iter: [16000/92000]	Loss 3.09633 (3.05151)	
+[2024-09-05 16:48:31,334][train_realnet.py][line: 264][    INFO] Epoch: [175/1000]	Iter: [16020/92000]	Loss 3.23677 (3.16490)	
+[2024-09-05 16:48:52,232][train_realnet.py][line: 264][    INFO] Epoch: [175/1000]	Iter: [16040/92000]	Loss 2.91778 (3.06687)	
+[2024-09-05 16:49:13,789][train_realnet.py][line: 264][    INFO] Epoch: [175/1000]	Iter: [16060/92000]	Loss 3.17558 (3.10565)	
+[2024-09-05 16:49:35,630][train_realnet.py][line: 264][    INFO] Epoch: [175/1000]	Iter: [16080/92000]	Loss 3.01791 (3.07382)	
+[2024-09-05 16:49:57,464][train_realnet.py][line: 264][    INFO] Epoch: [175/1000]	Iter: [16100/92000]	Loss 3.08877 (3.11867)	
+[2024-09-05 16:50:13,937][train_realnet.py][line: 320][    INFO]  * Loss 0.00549
+[2024-09-05 16:57:07,126][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.637222 | 0.725984 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 16:57:32,204][train_realnet.py][line: 264][    INFO] Epoch: [176/1000]	Iter: [16120/92000]	Loss 2.95042 (3.10762)	
+[2024-09-05 16:57:51,902][train_realnet.py][line: 264][    INFO] Epoch: [176/1000]	Iter: [16140/92000]	Loss 3.31853 (3.12368)	
+[2024-09-05 16:58:11,823][train_realnet.py][line: 264][    INFO] Epoch: [176/1000]	Iter: [16160/92000]	Loss 3.05628 (3.07879)	
+[2024-09-05 16:58:31,580][train_realnet.py][line: 264][    INFO] Epoch: [176/1000]	Iter: [16180/92000]	Loss 3.16838 (3.03870)	
+[2024-09-05 16:58:55,695][train_realnet.py][line: 264][    INFO] Epoch: [177/1000]	Iter: [16200/92000]	Loss 2.78823 (3.14156)	
+[2024-09-05 16:59:16,005][train_realnet.py][line: 264][    INFO] Epoch: [177/1000]	Iter: [16220/92000]	Loss 2.97378 (3.08760)	
+[2024-09-05 16:59:36,894][train_realnet.py][line: 264][    INFO] Epoch: [177/1000]	Iter: [16240/92000]	Loss 3.21947 (3.07377)	
+[2024-09-05 16:59:57,628][train_realnet.py][line: 264][    INFO] Epoch: [177/1000]	Iter: [16260/92000]	Loss 2.70472 (3.08102)	
+[2024-09-05 17:00:18,180][train_realnet.py][line: 264][    INFO] Epoch: [177/1000]	Iter: [16280/92000]	Loss 3.14814 (3.01746)	
+[2024-09-05 17:00:44,020][train_realnet.py][line: 264][    INFO] Epoch: [178/1000]	Iter: [16300/92000]	Loss 3.05723 (3.05748)	
+[2024-09-05 17:01:04,854][train_realnet.py][line: 264][    INFO] Epoch: [178/1000]	Iter: [16320/92000]	Loss 2.68769 (3.05213)	
+[2024-09-05 17:01:25,792][train_realnet.py][line: 264][    INFO] Epoch: [178/1000]	Iter: [16340/92000]	Loss 3.05044 (3.05413)	
+[2024-09-05 17:01:46,289][train_realnet.py][line: 264][    INFO] Epoch: [178/1000]	Iter: [16360/92000]	Loss 2.95112 (3.08469)	
+[2024-09-05 17:02:12,301][train_realnet.py][line: 264][    INFO] Epoch: [179/1000]	Iter: [16380/92000]	Loss 2.95478 (3.08569)	
+[2024-09-05 17:02:33,269][train_realnet.py][line: 264][    INFO] Epoch: [179/1000]	Iter: [16400/92000]	Loss 2.89901 (3.07432)	
+[2024-09-05 17:02:54,030][train_realnet.py][line: 264][    INFO] Epoch: [179/1000]	Iter: [16420/92000]	Loss 3.34953 (3.14977)	
+[2024-09-05 17:03:14,929][train_realnet.py][line: 264][    INFO] Epoch: [179/1000]	Iter: [16440/92000]	Loss 3.20298 (3.17530)	
+[2024-09-05 17:03:35,755][train_realnet.py][line: 264][    INFO] Epoch: [179/1000]	Iter: [16460/92000]	Loss 2.92285 (3.07070)	
+[2024-09-05 17:04:01,286][train_realnet.py][line: 264][    INFO] Epoch: [180/1000]	Iter: [16480/92000]	Loss 2.98929 (3.09514)	
+[2024-09-05 17:04:22,013][train_realnet.py][line: 264][    INFO] Epoch: [180/1000]	Iter: [16500/92000]	Loss 3.25223 (3.17009)	
+[2024-09-05 17:04:43,117][train_realnet.py][line: 264][    INFO] Epoch: [180/1000]	Iter: [16520/92000]	Loss 3.05027 (3.04156)	
+[2024-09-05 17:05:03,803][train_realnet.py][line: 264][    INFO] Epoch: [180/1000]	Iter: [16540/92000]	Loss 3.05301 (3.15104)	
+[2024-09-05 17:05:25,330][train_realnet.py][line: 264][    INFO] Epoch: [180/1000]	Iter: [16560/92000]	Loss 3.37611 (2.99712)	
+[2024-09-05 17:05:41,467][train_realnet.py][line: 320][    INFO]  * Loss 0.00483
+[2024-09-05 17:05:56,082][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.630306 | 0.718972 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 17:06:23,751][train_realnet.py][line: 264][    INFO] Epoch: [181/1000]	Iter: [16580/92000]	Loss 2.89367 (3.03311)	
+[2024-09-05 17:06:45,551][train_realnet.py][line: 264][    INFO] Epoch: [181/1000]	Iter: [16600/92000]	Loss 3.05780 (3.07011)	
+[2024-09-05 17:07:07,764][train_realnet.py][line: 264][    INFO] Epoch: [181/1000]	Iter: [16620/92000]	Loss 3.15874 (3.10677)	
+[2024-09-05 17:07:29,393][train_realnet.py][line: 264][    INFO] Epoch: [181/1000]	Iter: [16640/92000]	Loss 3.09962 (2.99318)	
+[2024-09-05 17:07:55,295][train_realnet.py][line: 264][    INFO] Epoch: [182/1000]	Iter: [16660/92000]	Loss 3.13742 (3.13805)	
+[2024-09-05 17:08:17,115][train_realnet.py][line: 264][    INFO] Epoch: [182/1000]	Iter: [16680/92000]	Loss 3.18740 (3.08713)	
+[2024-09-05 17:08:38,342][train_realnet.py][line: 264][    INFO] Epoch: [182/1000]	Iter: [16700/92000]	Loss 3.01622 (3.11060)	
+[2024-09-05 17:08:59,507][train_realnet.py][line: 264][    INFO] Epoch: [182/1000]	Iter: [16720/92000]	Loss 3.29181 (3.05969)	
+[2024-09-05 17:09:20,525][train_realnet.py][line: 264][    INFO] Epoch: [182/1000]	Iter: [16740/92000]	Loss 3.14728 (3.03528)	
+[2024-09-05 17:09:46,513][train_realnet.py][line: 264][    INFO] Epoch: [183/1000]	Iter: [16760/92000]	Loss 3.05313 (3.12385)	
+[2024-09-05 17:10:08,753][train_realnet.py][line: 264][    INFO] Epoch: [183/1000]	Iter: [16780/92000]	Loss 2.88056 (3.03189)	
+[2024-09-05 17:10:30,549][train_realnet.py][line: 264][    INFO] Epoch: [183/1000]	Iter: [16800/92000]	Loss 3.08858 (3.05200)	
+[2024-09-05 17:10:52,479][train_realnet.py][line: 264][    INFO] Epoch: [183/1000]	Iter: [16820/92000]	Loss 3.24850 (3.04643)	
+[2024-09-05 17:11:20,637][train_realnet.py][line: 264][    INFO] Epoch: [184/1000]	Iter: [16840/92000]	Loss 3.08838 (3.09113)	
+[2024-09-05 17:11:42,126][train_realnet.py][line: 264][    INFO] Epoch: [184/1000]	Iter: [16860/92000]	Loss 3.08885 (3.09529)	
+[2024-09-05 17:12:03,728][train_realnet.py][line: 264][    INFO] Epoch: [184/1000]	Iter: [16880/92000]	Loss 3.20848 (3.09497)	
+[2024-09-05 17:12:25,092][train_realnet.py][line: 264][    INFO] Epoch: [184/1000]	Iter: [16900/92000]	Loss 2.90934 (3.03874)	
+[2024-09-05 17:12:46,042][train_realnet.py][line: 264][    INFO] Epoch: [184/1000]	Iter: [16920/92000]	Loss 2.96068 (3.06233)	
+[2024-09-05 17:13:12,244][train_realnet.py][line: 264][    INFO] Epoch: [185/1000]	Iter: [16940/92000]	Loss 2.89304 (3.05124)	
+[2024-09-05 17:13:33,725][train_realnet.py][line: 264][    INFO] Epoch: [185/1000]	Iter: [16960/92000]	Loss 2.89395 (3.10062)	
+[2024-09-05 17:13:55,140][train_realnet.py][line: 264][    INFO] Epoch: [185/1000]	Iter: [16980/92000]	Loss 3.12247 (2.99017)	
+[2024-09-05 17:14:16,856][train_realnet.py][line: 264][    INFO] Epoch: [185/1000]	Iter: [17000/92000]	Loss 3.00918 (3.04128)	
+[2024-09-05 17:14:38,493][train_realnet.py][line: 264][    INFO] Epoch: [185/1000]	Iter: [17020/92000]	Loss 2.99463 (3.07153)	
+[2024-09-05 17:14:54,941][train_realnet.py][line: 320][    INFO]  * Loss 0.00553
+[2024-09-05 17:15:09,556][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.628083 | 0.736657 |
+|   best    | 0.625333 | 0.742324 |
+[2024-09-05 17:15:35,706][train_realnet.py][line: 264][    INFO] Epoch: [186/1000]	Iter: [17040/92000]	Loss 2.89030 (3.06614)	
+[2024-09-05 17:15:57,242][train_realnet.py][line: 264][    INFO] Epoch: [186/1000]	Iter: [17060/92000]	Loss 2.94940 (3.05833)	
+[2024-09-05 17:16:18,300][train_realnet.py][line: 264][    INFO] Epoch: [186/1000]	Iter: [17080/92000]	Loss 3.30077 (3.06341)	
+[2024-09-05 17:16:39,410][train_realnet.py][line: 264][    INFO] Epoch: [186/1000]	Iter: [17100/92000]	Loss 2.88240 (3.02561)	
+[2024-09-05 17:17:06,835][train_realnet.py][line: 264][    INFO] Epoch: [187/1000]	Iter: [17120/92000]	Loss 3.03228 (3.04659)	
+[2024-09-05 17:17:28,695][train_realnet.py][line: 264][    INFO] Epoch: [187/1000]	Iter: [17140/92000]	Loss 2.92335 (3.11424)	
+[2024-09-05 17:17:50,851][train_realnet.py][line: 264][    INFO] Epoch: [187/1000]	Iter: [17160/92000]	Loss 3.23276 (3.09092)	
+[2024-09-05 17:18:12,186][train_realnet.py][line: 264][    INFO] Epoch: [187/1000]	Iter: [17180/92000]	Loss 3.10946 (3.03505)	
+[2024-09-05 17:18:34,556][train_realnet.py][line: 264][    INFO] Epoch: [187/1000]	Iter: [17200/92000]	Loss 3.11910 (2.99013)	
+[2024-09-05 17:18:59,548][train_realnet.py][line: 264][    INFO] Epoch: [188/1000]	Iter: [17220/92000]	Loss 2.93843 (3.02932)	
+[2024-09-05 17:19:20,646][train_realnet.py][line: 264][    INFO] Epoch: [188/1000]	Iter: [17240/92000]	Loss 3.09148 (3.03280)	
+[2024-09-05 17:19:41,913][train_realnet.py][line: 264][    INFO] Epoch: [188/1000]	Iter: [17260/92000]	Loss 2.87621 (2.98364)	
+[2024-09-05 17:20:03,997][train_realnet.py][line: 264][    INFO] Epoch: [188/1000]	Iter: [17280/92000]	Loss 2.91905 (2.98134)	
+[2024-09-05 17:20:29,644][train_realnet.py][line: 264][    INFO] Epoch: [189/1000]	Iter: [17300/92000]	Loss 3.04693 (3.09465)	
+[2024-09-05 17:20:50,774][train_realnet.py][line: 264][    INFO] Epoch: [189/1000]	Iter: [17320/92000]	Loss 3.03624 (3.05090)	
+[2024-09-05 17:21:12,243][train_realnet.py][line: 264][    INFO] Epoch: [189/1000]	Iter: [17340/92000]	Loss 2.92777 (2.99833)	
+[2024-09-05 17:21:33,813][train_realnet.py][line: 264][    INFO] Epoch: [189/1000]	Iter: [17360/92000]	Loss 3.37558 (3.16582)	
+[2024-09-05 17:21:56,304][train_realnet.py][line: 264][    INFO] Epoch: [189/1000]	Iter: [17380/92000]	Loss 2.86106 (3.00825)	
+[2024-09-05 17:22:21,479][train_realnet.py][line: 264][    INFO] Epoch: [190/1000]	Iter: [17400/92000]	Loss 2.99783 (3.02276)	
+[2024-09-05 17:22:43,450][train_realnet.py][line: 264][    INFO] Epoch: [190/1000]	Iter: [17420/92000]	Loss 3.03525 (3.06605)	
+[2024-09-05 17:23:05,194][train_realnet.py][line: 264][    INFO] Epoch: [190/1000]	Iter: [17440/92000]	Loss 2.68818 (3.07182)	
+[2024-09-05 17:23:26,253][train_realnet.py][line: 264][    INFO] Epoch: [190/1000]	Iter: [17460/92000]	Loss 3.12400 (3.05689)	
+[2024-09-05 17:23:47,611][train_realnet.py][line: 264][    INFO] Epoch: [190/1000]	Iter: [17480/92000]	Loss 3.02010 (3.05823)	
+[2024-09-05 17:24:04,458][train_realnet.py][line: 320][    INFO]  * Loss 0.00594
+[2024-09-05 17:24:19,127][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.689222 | 0.732217 |
+|   best    | 0.689222 | 0.732217 |
+[2024-09-05 17:24:50,013][train_realnet.py][line: 264][    INFO] Epoch: [191/1000]	Iter: [17500/92000]	Loss 3.01457 (3.00474)	
+[2024-09-05 17:25:11,743][train_realnet.py][line: 264][    INFO] Epoch: [191/1000]	Iter: [17520/92000]	Loss 2.78359 (2.98621)	
+[2024-09-05 17:25:32,950][train_realnet.py][line: 264][    INFO] Epoch: [191/1000]	Iter: [17540/92000]	Loss 2.91806 (2.94605)	
+[2024-09-05 17:25:54,057][train_realnet.py][line: 264][    INFO] Epoch: [191/1000]	Iter: [17560/92000]	Loss 2.82440 (3.04056)	
+[2024-09-05 17:26:19,636][train_realnet.py][line: 264][    INFO] Epoch: [192/1000]	Iter: [17580/92000]	Loss 2.78146 (3.03693)	
+[2024-09-05 17:26:41,135][train_realnet.py][line: 264][    INFO] Epoch: [192/1000]	Iter: [17600/92000]	Loss 3.11353 (3.08247)	
+[2024-09-05 17:27:01,800][train_realnet.py][line: 264][    INFO] Epoch: [192/1000]	Iter: [17620/92000]	Loss 2.67348 (2.99535)	
+[2024-09-05 17:27:23,409][train_realnet.py][line: 264][    INFO] Epoch: [192/1000]	Iter: [17640/92000]	Loss 3.25771 (3.08793)	
+[2024-09-05 17:27:44,924][train_realnet.py][line: 264][    INFO] Epoch: [192/1000]	Iter: [17660/92000]	Loss 2.98209 (3.03867)	
+[2024-09-05 17:28:10,634][train_realnet.py][line: 264][    INFO] Epoch: [193/1000]	Iter: [17680/92000]	Loss 3.31624 (3.02493)	
+[2024-09-05 17:28:32,327][train_realnet.py][line: 264][    INFO] Epoch: [193/1000]	Iter: [17700/92000]	Loss 3.15471 (3.03277)	
+[2024-09-05 17:28:53,430][train_realnet.py][line: 264][    INFO] Epoch: [193/1000]	Iter: [17720/92000]	Loss 2.95568 (3.02085)	
+[2024-09-05 17:29:14,213][train_realnet.py][line: 264][    INFO] Epoch: [193/1000]	Iter: [17740/92000]	Loss 2.88693 (3.03479)	
+[2024-09-05 17:29:39,927][train_realnet.py][line: 264][    INFO] Epoch: [194/1000]	Iter: [17760/92000]	Loss 2.84414 (3.10669)	
+[2024-09-05 17:30:01,265][train_realnet.py][line: 264][    INFO] Epoch: [194/1000]	Iter: [17780/92000]	Loss 3.14106 (3.02864)	
+[2024-09-05 17:30:22,932][train_realnet.py][line: 264][    INFO] Epoch: [194/1000]	Iter: [17800/92000]	Loss 2.69375 (3.00127)	
+[2024-09-05 17:30:43,817][train_realnet.py][line: 264][    INFO] Epoch: [194/1000]	Iter: [17820/92000]	Loss 3.03125 (3.00143)	
+[2024-09-05 17:31:04,874][train_realnet.py][line: 264][    INFO] Epoch: [194/1000]	Iter: [17840/92000]	Loss 3.17030 (3.03114)	
+[2024-09-05 17:31:30,779][train_realnet.py][line: 264][    INFO] Epoch: [195/1000]	Iter: [17860/92000]	Loss 3.12706 (3.02380)	
+[2024-09-05 17:31:51,792][train_realnet.py][line: 264][    INFO] Epoch: [195/1000]	Iter: [17880/92000]	Loss 2.77818 (2.99719)	
+[2024-09-05 17:32:14,619][train_realnet.py][line: 264][    INFO] Epoch: [195/1000]	Iter: [17900/92000]	Loss 3.39808 (3.04569)	
+[2024-09-05 17:32:34,969][train_realnet.py][line: 264][    INFO] Epoch: [195/1000]	Iter: [17920/92000]	Loss 3.18893 (3.04431)	
+[2024-09-05 17:32:55,779][train_realnet.py][line: 264][    INFO] Epoch: [195/1000]	Iter: [17940/92000]	Loss 3.27419 (2.97311)	
+[2024-09-05 17:33:12,290][train_realnet.py][line: 320][    INFO]  * Loss 0.00456
+[2024-09-05 17:33:26,892][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel  |
+|:---------:|:--------:|:-------:|
+| LEISI_V2  | 0.680778 | 0.74192 |
+|   best    | 0.680778 | 0.74192 |
+[2024-09-05 17:33:58,984][train_realnet.py][line: 264][    INFO] Epoch: [196/1000]	Iter: [17960/92000]	Loss 2.81303 (3.02674)	
+[2024-09-05 17:34:20,176][train_realnet.py][line: 264][    INFO] Epoch: [196/1000]	Iter: [17980/92000]	Loss 3.03966 (3.07928)	
+[2024-09-05 17:34:41,589][train_realnet.py][line: 264][    INFO] Epoch: [196/1000]	Iter: [18000/92000]	Loss 2.74591 (3.05749)	
+[2024-09-05 17:35:03,020][train_realnet.py][line: 264][    INFO] Epoch: [196/1000]	Iter: [18020/92000]	Loss 2.86658 (3.00359)	
+[2024-09-05 17:35:30,111][train_realnet.py][line: 264][    INFO] Epoch: [197/1000]	Iter: [18040/92000]	Loss 3.04112 (3.03730)	
+[2024-09-05 17:35:51,981][train_realnet.py][line: 264][    INFO] Epoch: [197/1000]	Iter: [18060/92000]	Loss 3.15383 (3.04400)	
+[2024-09-05 17:36:14,226][train_realnet.py][line: 264][    INFO] Epoch: [197/1000]	Iter: [18080/92000]	Loss 3.33945 (2.99613)	
+[2024-09-05 17:36:35,423][train_realnet.py][line: 264][    INFO] Epoch: [197/1000]	Iter: [18100/92000]	Loss 2.72657 (2.92560)	
+[2024-09-05 17:36:56,355][train_realnet.py][line: 264][    INFO] Epoch: [197/1000]	Iter: [18120/92000]	Loss 2.95852 (3.01208)	
+[2024-09-05 17:37:21,462][train_realnet.py][line: 264][    INFO] Epoch: [198/1000]	Iter: [18140/92000]	Loss 2.87414 (2.93539)	
+[2024-09-05 17:37:42,331][train_realnet.py][line: 264][    INFO] Epoch: [198/1000]	Iter: [18160/92000]	Loss 3.13765 (2.98188)	
+[2024-09-05 17:38:03,241][train_realnet.py][line: 264][    INFO] Epoch: [198/1000]	Iter: [18180/92000]	Loss 2.91960 (3.01324)	
+[2024-09-05 17:38:25,206][train_realnet.py][line: 264][    INFO] Epoch: [198/1000]	Iter: [18200/92000]	Loss 3.20766 (3.05023)	
+[2024-09-05 17:38:50,904][train_realnet.py][line: 264][    INFO] Epoch: [199/1000]	Iter: [18220/92000]	Loss 2.76060 (2.96297)	
+[2024-09-05 17:39:11,977][train_realnet.py][line: 264][    INFO] Epoch: [199/1000]	Iter: [18240/92000]	Loss 3.25079 (3.00414)	
+[2024-09-05 17:39:33,628][train_realnet.py][line: 264][    INFO] Epoch: [199/1000]	Iter: [18260/92000]	Loss 3.43509 (3.03354)	
+[2024-09-05 17:39:55,312][train_realnet.py][line: 264][    INFO] Epoch: [199/1000]	Iter: [18280/92000]	Loss 3.08437 (3.06788)	
+[2024-09-05 17:40:17,161][train_realnet.py][line: 264][    INFO] Epoch: [199/1000]	Iter: [18300/92000]	Loss 2.98631 (2.94857)	
+[2024-09-05 17:40:42,763][train_realnet.py][line: 264][    INFO] Epoch: [200/1000]	Iter: [18320/92000]	Loss 3.14326 (3.08213)	
+[2024-09-05 17:41:04,309][train_realnet.py][line: 264][    INFO] Epoch: [200/1000]	Iter: [18340/92000]	Loss 3.08131 (3.03187)	
+[2024-09-05 17:41:25,408][train_realnet.py][line: 264][    INFO] Epoch: [200/1000]	Iter: [18360/92000]	Loss 2.96763 (3.07556)	
+[2024-09-05 17:41:46,804][train_realnet.py][line: 264][    INFO] Epoch: [200/1000]	Iter: [18380/92000]	Loss 3.07787 (3.02536)	
+[2024-09-05 17:42:07,729][train_realnet.py][line: 264][    INFO] Epoch: [200/1000]	Iter: [18400/92000]	Loss 3.18923 (3.05157)	
+[2024-09-05 17:42:24,293][train_realnet.py][line: 320][    INFO]  * Loss 0.00482
+[2024-09-05 17:42:38,712][ eval_helper.py][line: 257][    INFO] 
+|  clsname  |  image   |  pixel   |
+|:---------:|:--------:|:--------:|
+| LEISI_V2  | 0.664417 | 0.749906 |
+|   best    | 0.680778 | 0.74192  |
+[2024-09-05 17:43:06,140][train_realnet.py][line: 264][    INFO] Epoch: [201/1000]	Iter: [18420/92000]	Loss 2.72255 (2.97451)	
+[2024-09-05 17:43:28,020][train_realnet.py][line: 264][    INFO] Epoch: [201/1000]	Iter: [18440/92000]	Loss 2.84763 (3.04473)	
+[2024-09-05 17:43:50,758][train_realnet.py][line: 264][    INFO] Epoch: [201/1000]	Iter: [18460/92000]	Loss 3.05439 (3.01299)	
+[2024-09-05 17:44:12,370][train_realnet.py][line: 264][    INFO] Epoch: [201/1000]	Iter: [18480/92000]	Loss 2.82369 (2.97237)	
+[2024-09-05 17:44:38,711][train_realnet.py][line: 264][    INFO] Epoch: [202/1000]	Iter: [18500/92000]	Loss 2.92296 (2.94806)	
+[2024-09-05 17:45:00,224][train_realnet.py][line: 264][    INFO] Epoch: [202/1000]	Iter: [18520/92000]	Loss 2.85077 (2.94195)	
+[2024-09-05 17:45:21,976][train_realnet.py][line: 264][    INFO] Epoch: [202/1000]	Iter: [18540/92000]	Loss 2.69869 (2.95950)	
+[2024-09-05 17:45:43,194][train_realnet.py][line: 264][    INFO] Epoch: [202/1000]	Iter: [18560/92000]	Loss 2.98019 (3.06189)	
+[2024-09-05 17:46:05,066][train_realnet.py][line: 264][    INFO] Epoch: [202/1000]	Iter: [18580/92000]	Loss 2.94265 (3.05443)	
+[2024-09-05 17:46:30,565][train_realnet.py][line: 264][    INFO] Epoch: [203/1000]	Iter: [18600/92000]	Loss 3.19990 (3.01885)	
+[2024-09-05 17:46:51,791][train_realnet.py][line: 264][    INFO] Epoch: [203/1000]	Iter: [18620/92000]	Loss 3.02982 (3.03477)	
+[2024-09-05 17:47:12,929][train_realnet.py][line: 264][    INFO] Epoch: [203/1000]	Iter: [18640/92000]	Loss 3.01780 (2.97058)	

@@ -1,0 +1,142 @@
+[E ProcessGroupNCCL.cpp:737] [Rank 2] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=503588, OpType=BROADCAST, Timeout(ms)=1800000) ran for 1807681 milliseconds before timing out.
+[E ProcessGroupNCCL.cpp:737] [Rank 3] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=503588, OpType=BROADCAST, Timeout(ms)=1800000) ran for 1807913 milliseconds before timing out.
+[E ProcessGroupNCCL.cpp:737] [Rank 1] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=503588, OpType=BROADCAST, Timeout(ms)=1800000) ran for 1807912 milliseconds before timing out.
+
+Traceback (most recent call last):
+  File "train_realnet.py", line 328, in <module>
+    main()
+  File "train_realnet.py", line 176, in main
+    train_one_epoch(
+  File "train_realnet.py", line 241, in train_one_epoch
+    outputs = model(input,train=True)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 1008, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 969, in _run_ddp_forward
+    return module_to_run(*inputs[0], **kwargs[0])
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/project/RealNet/models/model_helper.py", line 52, in forward
+    output = submodule(input,train)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/project/RealNet/models/rrs/rrs.py", line 109, in forward
+    residual_idx = self.bn_idx(residual)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 748, in forward
+    return sync_batch_norm.apply(
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/_functions.py", line 56, in forward
+    dist._all_gather_base(combined_flat, combined, process_group, async_op=False)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/distributed_c10d.py", line 2136, in _all_gather_base
+    work = group._allgather_base(output_tensor, input_tensor)
+RuntimeError: NCCL communicator was aborted on rank 3.  Original reason for failure was: [Rank 3] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=503588, OpType=BROADCAST, Timeout(ms)=1800000) ran for 1807913 milliseconds before timing out.
+Traceback (most recent call last):
+  File "train_realnet.py", line 328, in <module>
+    main()
+  File "train_realnet.py", line 176, in main
+    train_one_epoch(
+  File "train_realnet.py", line 241, in train_one_epoch
+    outputs = model(input,train=True)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 1008, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 969, in _run_ddp_forward
+    return module_to_run(*inputs[0], **kwargs[0])
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/project/RealNet/models/model_helper.py", line 52, in forward
+    output = submodule(input,train)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/project/RealNet/models/rrs/rrs.py", line 109, in forward
+    residual_idx = self.bn_idx(residual)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 748, in forward
+    return sync_batch_norm.apply(
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/_functions.py", line 56, in forward
+    dist._all_gather_base(combined_flat, combined, process_group, async_op=False)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/distributed_c10d.py", line 2136, in _all_gather_base
+    work = group._allgather_base(output_tensor, input_tensor)
+RuntimeError: NCCL communicator was aborted on rank 2.  Original reason for failure was: [Rank 2] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=503588, OpType=BROADCAST, Timeout(ms)=1800000) ran for 1807681 milliseconds before timing out.
+Traceback (most recent call last):
+  File "train_realnet.py", line 328, in <module>
+    main()
+  File "train_realnet.py", line 176, in main
+    train_one_epoch(
+  File "train_realnet.py", line 241, in train_one_epoch
+    outputs = model(input,train=True)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 1008, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 969, in _run_ddp_forward
+    return module_to_run(*inputs[0], **kwargs[0])
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/project/RealNet/models/model_helper.py", line 52, in forward
+    output = submodule(input,train)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/project/RealNet/models/rrs/rrs.py", line 109, in forward
+    residual_idx = self.bn_idx(residual)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 748, in forward
+    return sync_batch_norm.apply(
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/nn/modules/_functions.py", line 56, in forward
+    dist._all_gather_base(combined_flat, combined, process_group, async_op=False)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/distributed_c10d.py", line 2136, in _all_gather_base
+    work = group._allgather_base(output_tensor, input_tensor)
+RuntimeError: NCCL communicator was aborted on rank 1.  Original reason for failure was: [Rank 1] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=503588, OpType=BROADCAST, Timeout(ms)=1800000) ran for 1807912 milliseconds before timing out.
+
+^[[A^[[AWARNING:torch.distributed.elastic.multiprocessing.api:Sending process 1095 closing signal SIGTERM
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 1 (pid: 1096) of binary: /home/hrz/miniconda3/envs/RealNet/bin/python
+Traceback (most recent call last):
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/launch.py", line 193, in <module>
+    main()
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/launch.py", line 189, in main
+    launch(args)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/launch.py", line 174, in launch
+    run(args)
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/run.py", line 752, in run
+    elastic_launch(
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 131, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/hrz/miniconda3/envs/RealNet/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 245, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError:
+============================================================
+train_realnet.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-09-05_18:40:50
+  host      : b3-331-1
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 1097)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-09-05_18:40:50
+  host      : b3-331-1
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 1098)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-05_18:40:50
+  host      : b3-331-1
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 1096)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
