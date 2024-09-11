@@ -10,12 +10,12 @@ dataset:
       image_dir: ./data/LEISI_V2/leisi/
       color_mode: RGB
   train:
-    meta_file: ./data/LEISI_V2/samples/train_uni.json
+    meta_file: ./data/LEISI_V2/samples/diff_train_uni.json
     hflip: False
     vflip: False
     rotate: False
   test:
-    meta_file: ./data/LEISI_V2/samples/train_uni.json
+    meta_file: ./data/LEISI_V2/samples/diff_train_uni.json
   input_size: [256,256]
   pixel_mean: [ 0.278, 0.278, 0.278 ]
   pixel_std: [ 0.238, 0.238, 0.238 ]
@@ -79,5 +79,5 @@ TestSampler:
 
 saver:
   checkpoints_dir: diffusion_checkpoints/
-  log_dir: diffusion_log/
-  vis_dir: diffusion_vis/
+  log_dir: target_diffusion_log/
+  vis_dir: target_diffusion_vis/

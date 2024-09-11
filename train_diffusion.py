@@ -60,6 +60,7 @@ def SDAS_sample(imgs,class_labels,model,sampler):
 
     x_gen=torch.cat([x0_normal,x0_week,x0_strong],dim=3)
 
+    # noise
     xt_det = sampler.ddim_reverse_sample_loop(
         model=model,
         x=imgs,
@@ -67,7 +68,7 @@ def SDAS_sample(imgs,class_labels,model,sampler):
         device=device,
         model_kwargs={'y': class_labels})['sample']
 
-
+    # recon
     x0_det = sampler.ddim_sample_loop(model=model,
                             noise=xt_det,
                             eta=0.0,

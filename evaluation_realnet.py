@@ -82,7 +82,7 @@ def main():
 
     args.checkpoints_folder = os.path.join(config.exp_path, config.saver.checkpoints_dir,args.class_name)
 
-    args.model_path=os.path.join(args.checkpoints_folder,"ckpt_best.pth.tar")
+    args.model_path=os.path.join(args.checkpoints_folder,"DTD_ckpt_best.pth.tar")
 
     config=update_config(config,args)
     set_seed(config.random_seed)

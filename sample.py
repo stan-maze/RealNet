@@ -132,6 +132,8 @@ def main():
                 for idx in range(B):
                     Image.fromarray(x1[idx]).save(os.path.join(config.export_path,"rank{}_{}.jpg".format(rank,i*B+idx)))
 
+        
+
 
 if __name__ == "__main__":
     main()

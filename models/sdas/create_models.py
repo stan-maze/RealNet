@@ -38,7 +38,8 @@ def create_diffusion_unet(
                         )
 
     if pertrain_path is not None:
-        missing_keys, unexpected_keys = load_pertrain_weights(pertrain_path,unet)
+        pass
+        # missing_keys, unexpected_keys = load_pertrain_weights(pertrain_path,unet)
         # print(missing_keys, unexpected_keys)
     return unet
 
