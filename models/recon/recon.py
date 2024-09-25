@@ -263,6 +263,7 @@ class ReconstructionLayer(nn.Module):
         self.attention_mult=attention_mult
 
         for block_name in self.inplanes:
+            # print(int(hide_channels_ratio*self.inplanes[block_name]))
             module= UNetModel(
                 in_channels=self.inplanes[block_name],
                 out_channels=self.inplanes[block_name],

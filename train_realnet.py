@@ -17,15 +17,16 @@ from utils.dist_helper import setup_distributed
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.distributed as dist
 from utils.categories import Categories
+from torchvision.utils import save_image
 
 
 warnings.filterwarnings('ignore')
 parser = argparse.ArgumentParser(description="train RealNet")
 parser.add_argument("--config", default="experiments/{}/realnet.yaml")
-parser.add_argument("--dataset", default="MVTec-AD",choices=['LEISI_V2','MVTec-AD','VisA','MPDD','BTAD'])
+parser.add_argument("--dataset", default="LEISI_V2",choices=['LEISI_V2','MVTec-AD','VisA','MPDD','BTAD'])
 parser.add_argument("--local_rank", default=-1, type=int)
 
-parser.add_argument("--class_name", default="bottle",choices=[
+parser.add_argument("--class_name", default="LEISI_V2",choices=[
         # mvtec-ad
         "bottle",
         "cable",
@@ -126,6 +127,18 @@ def main():
 
     train_loader, val_loader = build_dataloader(config.dataset, distributed=True)
 
+
+    # save_dir = './saved_images'
+    # os.makedirs(save_dir, exist_ok=True)
+    # train_iter = iter(train_loader)
+    # input = next(train_iter)
+    # save_image(input['image'], os.path.join(save_dir, 'batch_image_grid.png'))
+    # save_image(input['mask'], os.path.join(save_dir, 'batch_mask_grid.png'))
+    # exit()
+
+
+
+
     local_rank = int(os.environ["LOCAL_RANK"])
 
     model = ModelHelper(config.net)
@@ -135,6 +148,8 @@ def main():
         summary_model(model, logger)
 
     model.afs.init_idxs(model, train_loader, distributed=True)
+    # exit()
+
     model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
     model = DDP(

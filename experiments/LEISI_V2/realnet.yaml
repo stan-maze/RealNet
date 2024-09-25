@@ -10,11 +10,12 @@ dataset:
       color_mode: RGB
   train:
     meta_file: data/LEISI_V2/samples/train_{}.json
+    # meta_file: data/LEISI_V2/samples/tmp.json
     dtd_dir: data/DTD/images
     sdas_dir: data/LEISI_V2/sdas/{}
     dtd_transparency_range: [0.2, 1.0]
     sdas_transparency_range: [0.5, 1.0]
-    perlin_scale: 6
+    perlin_scale: 5
     min_perlin_scale: 0
     hflip: False
     vflip: False
@@ -34,39 +35,46 @@ dataset:
     #  normal: 0.5
     #  dtd: 0.25
     #  sdas: 0.25
+    
+    # use normal only
+    # anomaly_types:
+    #  normal: 1
+    #  dtd: 0
+     
+     
   test:
     meta_file: ./data/LEISI_V2/samples/test_{}.json
-  input_size: [256,256]
-  pixel_mean: [ 0.278, 0.278, 0.278 ]
-  pixel_std: [ 0.238, 0.238, 0.238 ]
-  batch_size: 12
-  workers: 12
+  input_size: [256, 256]
+  pixel_mean: [ 0.2786, 0.2786, 0.2786 ]
+  pixel_std: [ 0.212, 0.212, 0.212 ]
+  batch_size: 16
+  workers: 4
 
 
 structure:
   - name: block1
     layers:
       - idx: layer1
-        planes: 256
+        planes: 128
     stride: 4
 
   - name: block2
     layers:
       - idx: layer2
-        planes: 512
+        planes: 256
     stride: 8
 
   - name: block3
     layers:
       - idx: layer3
-        planes: 512
+        planes: 128
     stride: 16
 
   - name: block4
     layers:
       - idx: layer4
-        planes: 256
-    stride: 32
+        planes: 64
+    stride: 16
 
 # architecture B in paper, training requires 32GB GPU memory.
 #structure:
@@ -93,6 +101,7 @@ net:
     frozen: True
     kwargs:
       backbone: wide_resnet50_2
+      # backbone: resnet34
 
   - name: afs
     type: models.afs.AFS
@@ -106,7 +115,7 @@ net:
     prev: afs
     kwargs:
       num_res_blocks: 2
-      hide_channels_ratio: 0.25
+      hide_channels_ratio: 0.5
       channel_mult: [1,2,4]
       attention_mult: [2,4]
 
@@ -122,7 +131,7 @@ net:
 trainer:
   max_epoch: 1000
   val_freq_epoch: 5
-  print_freq_step: 20
+  print_freq_step: 10
   optimizer:
     type: Adam
     kwargs:
@@ -155,3 +164,6 @@ evaluator:
         kwargs:
           avgpool_size: [16, 16]
       - name: pixel
+      - name: Fb
+        kwargs:
+          avgpool_size: [16, 16]

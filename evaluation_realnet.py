@@ -14,13 +14,15 @@ from utils.visualize import export_segment_images
 from utils.eval_helper import Report
 from train_realnet import update_config
 from utils.categories import Categories
+from datetime import datetime
+import tabulate
 
 
 warnings.filterwarnings('ignore')
 parser = argparse.ArgumentParser(description="evaluation RealNet")
 parser.add_argument("--config", default="experiments/{}/realnet.yaml")
-parser.add_argument("--dataset", default="MVTec-AD",choices=['LEISI_V2','MVTec-AD','VisA','MPDD','BTAD'])
-parser.add_argument("--class_name", default="bottle",choices=[
+parser.add_argument("--dataset", default="LEISI_V2",choices=['LEISI_V2','MVTec-AD','VisA','MPDD','BTAD'])
+parser.add_argument("--class_name", default="LEISI_V2",choices=[
         # mvtec-ad
         "bottle",
         "cable",
@@ -66,7 +68,7 @@ parser.add_argument("--class_name", default="bottle",choices=[
         ] )
 
 
-def main():
+def main(test_file=None, export = True, ckpt = 'ckpt_best.pth.tar'):
     args = parser.parse_args()
 
     class_name_list=Categories[args.dataset]
@@ -82,25 +84,34 @@ def main():
 
     args.checkpoints_folder = os.path.join(config.exp_path, config.saver.checkpoints_dir,args.class_name)
 
-    args.model_path=os.path.join(args.checkpoints_folder,"DTD_ckpt_best.pth.tar")
+    print(f'ckpt: {ckpt}')
+    args.model_path=os.path.join(args.checkpoints_folder,ckpt)
 
     config=update_config(config,args)
+    if test_file:
+        print(f'testing: ./data/LEISI_V2/samples/{test_file}')
+        config.dataset.test.meta_file = f'./data/LEISI_V2/samples/{test_file}'
+        config.vis_path = os.path.join(config.exp_path, config.saver.vis_dir, test_file[:2])
+    else:
+        print(f'testing: {config.dataset.test.meta_file}')
+        config.vis_path = os.path.join(config.exp_path, config.saver.vis_dir)
+
+
     set_seed(config.random_seed)
 
     config.evaluator.metrics['auc'].append({'name':'pro'})
 
-    config.vis_path = os.path.join(config.exp_path, config.saver.vis_dir)
     os.makedirs(config.vis_path, exist_ok=True)
 
     _, val_loader = build_dataloader(config.dataset,distributed=False)
 
     model = ModelHelper(config.net)
-    model.cuda()
+    model.cpu()
 
     state_dict=torch.load(args.model_path)
     model.load_state_dict(state_dict['state_dict'],strict=False)
 
-    ret_metrics = validate(config,val_loader, model,args.class_name)
+    ret_metrics = validate(config,val_loader, model,args.class_name, export = export )
     print_metrics(ret_metrics, config.evaluator.metrics, args.class_name)
 
 
@@ -127,7 +138,7 @@ def print_metrics(ret_metrics, config, class_name):
 
 
 
-def validate(config,val_loader, model,class_name):
+def validate(config,val_loader, model,class_name, export = True):
 
     model.eval()
 
@@ -152,10 +163,19 @@ def validate(config,val_loader, model,class_name):
             preds.append(outputs["anomaly_score"].cpu().numpy())
             masks.append(outputs["mask"].cpu().numpy())
 
+
+    print(f'prediction finished at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+
+
     preds = np.squeeze(np.concatenate(np.asarray(preds), axis=0),axis=1)  # N x H x W
     masks = np.squeeze(np.concatenate(np.asarray(masks), axis=0),axis=1)  # N x H x W
 
     ret_metrics = performances(class_name, preds, masks, config.evaluator.metrics)
+
+    print(f'image F1 cacu finished at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+    # if not export:
+    #     return ret_metrics
+
 
     preds_cls = []
     masks_cls = []
@@ -170,14 +190,57 @@ def validate(config,val_loader, model,class_name):
     masks_cls = np.concatenate(np.asarray(masks_cls), axis=0)  # N x H x W
     masks_cls[masks_cls != 0.0] = 1.0
 
-    precision, recall, thresholds = precision_recall_curve(masks_cls.flatten(), preds_cls.flatten())
-    a = 2 * precision * recall
-    b = precision + recall
-    f1 = np.divide(a, b, out=np.zeros_like(a), where=b != 0)
-    seg_threshold = thresholds[np.argmax(f1)]
+    # pixel level
+    # precision, recall, thresholds = precision_recall_curve(masks_cls.flatten(), preds_cls.flatten())
+    # a = 2 * precision * recall
+    # b = precision + recall
+    # f1 = np.divide(a, b, out=np.zeros_like(a), where=b != 0)
+    # seg_threshold = thresholds[np.argmax(f1)]
+    # print(f1[np.argmax(f1)])
+    # print(precision[np.argmax(f1)])
+    # print(recall[np.argmax(f1)])
+    # print(f'seg_threshold: {seg_threshold}')
+
+    # image level
+    N, _, _ = masks.shape
+    image_masks_cls = (masks_cls.reshape(N, -1).sum(axis=1) != 0).astype(np.int)
+    image_preds_cls = preds_cls.reshape(N, -1).max(axis=1)
+    precision, recall, thresholds = precision_recall_curve(image_masks_cls, image_preds_cls)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        beta = 2
+        a = 2 * precision * recall
+        b = precision + recall
+        f1 = np.where(b != 0, a / b, 0)
+
+        a = (1 + beta**2) * precision * recall
+        b = (beta**2) * precision + recall
+        fb = np.where(b != 0, a / b, 0)
+
+    max_fb_index = np.argmax(fb)
+    seg_threshold = thresholds[max_fb_index]
+    # seg_threshold = np.max(image_preds_cls[image_preds_cls < seg_threshold])
+
+    print(tabulate.tabulate([[fb[max_fb_index], f1[max_fb_index], precision[max_fb_index], recall[max_fb_index]]], 
+                    headers=["Fβ", "F1", "Precision", "Recall"], tablefmt="pretty"))
+    print(f'seg_threshold: {seg_threshold}')
+
+
+    print(f'caculation finished at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
     export_segment_images(config, image_paths, masks_cls, preds_cls, seg_threshold, class_name)
+    print(f'export finished at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+
     return ret_metrics
 
 
 if __name__ == "__main__":
-    main()
+    ckpt = '256_nowbest_0.75_ckpt_best.pth.tar'
+    # print('='*50)
+    # main(export = False)
+    # print('='*50)
+    # main(test_file = f'tmp.json', ckpt = ckpt)
+    print('='*50)
+    main(test_file = f'ez_test.json', ckpt = ckpt)
+    print('='*50)
+    main(test_file = f'hd_test.json', ckpt = ckpt)
+    print('='*50)
+

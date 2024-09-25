@@ -57,13 +57,15 @@ def export_segment_images(config, test_img_paths, gts, scores, threshold,class_n
 
         score_mask = np.zeros_like(scores[i])
         score_mask[scores[i] >  threshold] = 1.0
+        # print(sum(score_mask))
         score_mask = (255.0*score_mask).astype(np.uint8)
 
         score_map = scores[i] * scores_norm
 
-        heat = show_cam_on_image(img / 255, score_map, use_rgb=True)
+        heat = show_cam_on_image(img / 255, score_map, use_rgb=True, image_weight=0.3)
 
         score_img = mark_boundaries(heat, score_mask, color=(1, 0, 0), mode='thick')
+        # score_img = mark_boundaries(heat, score_mask, color=(0, 1, 0), mode='thick')
 
         merge=np.concatenate([img,255*gt_mask,255*score_img],axis=1).astype(np.uint8)
         Image.fromarray(merge).save(save_path)

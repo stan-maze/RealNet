@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from sklearn import metrics
 from skimage import measure
 from sklearn.metrics import precision_recall_curve
+import torch.distributed as dist
+
 
 class Report:
     def __init__(self, heads=None):
@@ -67,9 +69,6 @@ class EvalImage:
             auc = 1 - auc
         return auc
     
-    
-
-
 
 class EvalImageMax(EvalImage):
     @staticmethod
@@ -83,16 +82,61 @@ class EvalImageMax(EvalImage):
     
     def eval_f1(self):
         precision, recall, thresholds = precision_recall_curve(self.masks, self.preds)
-        a = 2 * precision * recall
-        b = precision + recall
-        f1 = a / b
-        with open('image_fi_list.txt', 'w') as file:
-            for score in f1:
-                file.write(f'{score}\n')
-        print(f'image level F1: {max(f1)}')
-        return max(f1)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            a = 2 * precision * recall
+            b = precision + recall
+            f1 = np.where(b != 0, a / b, 0)
 
+        max_f1_index = f1.argmax()
+        max_f1 = f1[max_f1_index]
+        max_precision = precision[max_f1_index]
+        max_recall = recall[max_f1_index]
 
+        # print(f'image level F1: {max_f1}')
+        # print(f'Precision at max F1: {max_precision}')
+        # print(f'Recall at max F1: {max_recall}')
+        return max_f1
+    
+
+class EvalF1(EvalImage):
+    @staticmethod
+    def encode_pred(preds, avgpool_size):
+        N, _, _ = preds.shape
+        preds = torch.tensor(preds[:, None, ...]).cuda()  # N x 1 x H x W
+        preds = (
+            F.avg_pool2d(preds, avgpool_size, stride=1).cpu().numpy()
+        )  # N x 1 x H x W
+        return preds.reshape(N, -1).max(axis=1)  # (N, )
+    
+    def eval_auc(self):
+        beta = 2
+        precision, recall, thresholds = precision_recall_curve(self.masks, self.preds)
+        
+        with np.errstate(divide='ignore', invalid='ignore'):
+            a = 2 * precision * recall
+            b = precision + recall
+            f1 = np.where(b != 0, a / b, 0)
+
+        max_f1_index = f1.argmax()
+        max_f11 = f1[max_f1_index]
+
+        with np.errstate(divide='ignore', invalid='ignore'):
+            # 倾向关注recall的f1
+            a = (1 + beta**2) * precision * recall
+            b = (beta**2) * precision + recall
+            f1 = np.where(b != 0, a / b, 0)
+
+        max_f1_index = f1.argmax()
+        max_f1 = f1[max_f1_index]
+        max_precision = precision[max_f1_index]
+        max_recall = recall[max_f1_index]
+
+        rank = dist.get_rank()
+        if rank == 0:
+            print(tabulate.tabulate([[max_f1, max_f11, max_precision, max_recall]], 
+                        headers=["Fβ", "F1", "Precision", "Recall"], tablefmt="pretty"))
+        
+        return max_f1
 
 
 class EvalPixelAUC:
@@ -183,6 +227,7 @@ class EvalPixelPro:
 
 
 eval_lookup_table = {
+    "Fb": EvalF1,
     "image": EvalImageMax,
     "pixel": EvalPixelAUC,
     "pro":EvalPixelPro,
@@ -212,11 +257,10 @@ def performances(class_name, preds, masks, config):
                 kwargs = metric.get("kwargs", {})
                 eval_method = eval_lookup_table[evalname](data_meta, **kwargs)
                 auc = eval_method.eval_auc()
-                if evalname == 'image':
-                    image_f1 = eval_method.eval_f1()
-                    print(f'image level F1: {image_f1}')
+                # if evalname == 'image':
+                #     image_f1 = eval_method.eval_f1()
+                #     print(f'image level F1: {image_f1}')
                 ret_metrics["{}_{}_auc".format(clsname, evalname)] = auc
-
 
     if config.get("auc", None):
         for metric in config.auc:
@@ -255,6 +299,3 @@ def log_metrics(ret_metrics, config,logger_name):
             record.add_one_record([clsname] + clsvalues)
 
         logger.info(f"\n{record}")
-
-
-

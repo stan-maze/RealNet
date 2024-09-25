@@ -17,13 +17,17 @@ import imgaug.augmenters as iaa
 import math
 from skimage import morphology
 from torch.utils.data.distributed import DistributedSampler
+from imgaug import augmenters as iaa
+from scipy.ndimage import label, find_objects
+from torchvision.utils import save_image
+import torchvision.utils as vutils
 
 
 def lerp_np(x,y,w):
     fin_out = (y-x)*w + x
     return fin_out
 
-def rand_perlin_2d_np(shape, res, fade=lambda t: 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3):
+def rand_perlin_2d_np(shape, res, fade=lambda t: ((6*t - 15)*t + 10)*t*t*t):
     delta = (res[0] / shape[0], res[1] / shape[1])
     d = (shape[0] // res[0], shape[1] // res[1])
     grid = np.mgrid[0:res[0]:delta[0], 0:res[1]:delta[1]].transpose(1, 2, 0) % 1
@@ -116,6 +120,7 @@ class RealNetDataset(BaseDataset):
         self.normalize_fn = normalize_fn
         self.anomaly_types = anomaly_types
         self.dataset=dataset
+        self.elastic = iaa.ElasticTransformation(alpha=50, sigma=20)
 
         if training:
             self.dtd_dir=dtd_dir
@@ -179,6 +184,10 @@ class RealNetDataset(BaseDataset):
 
         image = Image.fromarray(image, "RGB")
 
+
+        # save_dir = 'saved_images'
+        # image.save(os.path.join(save_dir, 'image_after_read.png'))
+
         # read / generate mask
 
         if meta.get("maskname", None):
@@ -190,11 +199,19 @@ class RealNetDataset(BaseDataset):
                 mask = (np.ones((image.height, image.width)) * 255).astype(np.uint8)
             else:
                 raise ValueError("Labels must be [None, 0, 1]!")
+            
+
+        # image.save(os.path.join(save_dir, 'image_before_transform.png'))
+        # mask.save(os.path.join(save_dir, 'mask_before_transform.png'))
 
         mask = Image.fromarray(mask, "L")
 
         if self.transform_fn:
             image, mask = self.transform_fn(image, mask)
+
+        # image.save(os.path.join(save_dir, 'image_after_transform.png'))
+        # mask.save(os.path.join(save_dir, 'mask_after_transform.png'))
+
 
         if self.training:
             gt_image = copy.deepcopy(image)
@@ -206,18 +223,28 @@ class RealNetDataset(BaseDataset):
         image_anomaly_type =self.choice_anomaly_type()
         assert image_anomaly_type in ['normal','dtd','sdas']
 
-        if image_anomaly_type!='normal':
+        if image_anomaly_type!='normal' and label != 1:
             anomaly_image, anomaly_mask = self.generate_anomaly(np.array(image), self.dataset, input["clsname"],image_anomaly_type)
             image = Image.fromarray(anomaly_image, "RGB")
             mask = Image.fromarray(np.array(anomaly_mask*255.0).astype(np.uint8), "L")
+            # image.save(os.path.join(save_dir, 'image_after_anomaly.png'))
 
+        # image.save(os.path.join(save_dir, 'image_before_normalize.png'))
         image = transforms.ToTensor()(image)
         mask = transforms.ToTensor()(mask)
 
         if self.normalize_fn:
             image = self.normalize_fn(image)
+        
+        # image_after_normalize = transforms.ToPILImage()(image)
+        # image_after_normalize.save(os.path.join(save_dir, 'image_after_normalize.png'))
 
         input.update({"image": image, "mask": mask, "anomaly_type":image_anomaly_type})
+
+        # print(input["image"])
+        # save_image(input['image'], os.path.join(save_dir, 'input.png'))
+        # transforms.ToPILImage()(input["image"]*255).save(os.path.join(save_dir, 'input.png'))
+
         return input
 
 
@@ -237,10 +264,25 @@ class RealNetDataset(BaseDataset):
         '''
 
         target_foreground_mask = self.generate_target_foreground_mask(img,dataset, subclass)
-        # Image.fromarray(target_foreground_mask*255).convert('L').save("foreground.jpg")
+        # Image.fromarray(target_foreground_mask*255).convert('L').save("target_foreground_mask.jpg")
+        # cv2.imwrite('target_foreground_mask.jpg', target_foreground_mask * 255)
+        # Image.fromarray(img).save("target_image.jpg")
+        # # cv2.imwrite('target_image.jpg', img)
+        # exit()
 
-        ## perlin noise mask
-        perlin_noise_mask = self.generate_perlin_noise_mask()
+        if np.random.rand() > 0.6:
+            perlin_noise_mask = self.generate_stringy_noise_mask()
+        else:
+            perlin_noise_mask = self.vex_generate_perlin_noise_mask()
+
+        # perlin_noise_mask = self.generate_perlin_noise_mask()
+        # # perlin noise mask
+        # perlin_noise_mask = self.generate_stringy_noise_mask()
+        # Image.fromarray(perlin_noise_mask*255).convert('L').save("vertical_thread_noise.jpg")
+        # perlin_noise_mask = self.vex_generate_perlin_noise_mask()
+        # # perlin_noise_mask = self.generate_perlin_noise_mask()
+        # Image.fromarray(perlin_noise_mask*255).convert('L').save("perlin_noise_mask_vex.jpg")
+        # # exit()
 
         ## mask
         mask = perlin_noise_mask * target_foreground_mask
@@ -252,6 +294,8 @@ class RealNetDataset(BaseDataset):
         anomaly_source_img = self.anomaly_source(img=img,
                                                  mask=mask,
                                                  anomaly_type=image_anomaly_type).astype(np.uint8)
+        
+
 
         return anomaly_source_img, mask
 
@@ -260,7 +304,10 @@ class RealNetDataset(BaseDataset):
 
         if dataset=='LEISI_V2':
             img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-            return np.ones_like(img_gray)
+            # return np.ones_like(img_gray)
+            _, target_foreground_mask = cv2.threshold(img_gray, 35, 255, cv2.THRESH_BINARY)
+            target_foreground_mask = target_foreground_mask.astype(np.bool).astype(np.int)
+            return target_foreground_mask
             # 使用Otsu阈值分割
             _, target_foreground_mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
             target_foreground_mask = target_background_mask.astype(np.bool).astype(np.int)
@@ -341,9 +388,6 @@ class RealNetDataset(BaseDataset):
             target_foreground_mask = morphology.opening(target_foreground_mask, morphology.square(6))
             return target_foreground_mask
 
-            
-
-
         else:
             raise NotImplementedError(f"dataset type '{dataset}' is not supported")
 
@@ -367,6 +411,180 @@ class RealNetDataset(BaseDataset):
             np.zeros_like(perlin_noise)
         )
         return mask_noise
+    
+
+    def vex_generate_perlin_noise_mask(self) -> np.ndarray:
+        # 定义纵向优先的 perlin noise 比例
+        # 增加 y 轴的伸展以生成更纵向的噪声
+        perlin_scalex = 2 ** (torch.randint(0, 5, (1,)).numpy()[0])
+        perlin_scaley = 2 ** np.random.choice([torch.randint(0, 5, (1,)).numpy()[0], torch.randint(2, 7, (1,)).numpy()[0]])
+        
+        # 生成柏林噪声
+        perlin_noise = rand_perlin_2d_np((self.resize[0], self.resize[1]), (perlin_scalex, perlin_scaley))
+
+        # 应用旋转，使噪声更趋向于垂直方向
+        # 在旋转范围中增加纵向倾向 (-5, 5) 使得变化更小
+        rot = iaa.Affine(rotate=(-20, 20))  # 保持较小角度的旋转
+        perlin_noise = rot(image=perlin_noise)
+
+        # 应用稀疏化操作，减少线条数量
+        # 通过增加阈值来减少活跃的噪声区域
+        mask_noise = np.where(
+            perlin_noise > self.perlin_noise_threshold,
+            np.ones_like(perlin_noise),
+            np.zeros_like(perlin_noise)
+        )
+        
+        labeled_mask, num_features = label(mask_noise)
+        area_sizes = [np.sum(labeled_mask == (i + 1)) for i in range(num_features)]
+        areas_with_indices = list(enumerate(area_sizes))
+        areas_with_indices.sort(key=lambda x: x[1], reverse=True)
+        max_indices = [idx for idx, _ in areas_with_indices[:5]]
+        min_indices = [idx for idx, _ in areas_with_indices[-3:]]
+
+        mask_noise = np.zeros_like(mask_noise)
+        for idx in max_indices + min_indices:
+            mask_noise[labeled_mask == (idx + 1)] = 1
+        return mask_noise
+        
+    # def generate_stringy_noise_mask(self) -> np.ndarray:
+    #     perlin_scalex = 2 ** (torch.randint(0, 4, (1,)).numpy()[0])
+    #     perlin_scaley = 2 ** (torch.randint(5, 9, (1,)).numpy()[0])  # scale y higher for vertical stretching
+
+    #     perlin_noise = rand_perlin_2d_np((self.resize[0], self.resize[1]), (perlin_scalex, perlin_scaley))
+
+    #     rot = iaa.Affine(rotate=(0, 0), shear=(-10, 10))  # 仅使用轻微的剪切以保持线条接近垂直
+    #     perlin_noise = rot(image=perlin_noise)        
+
+    #     mask_noise = np.where(
+    #         perlin_noise > self.perlin_noise_threshold,
+    #         np.ones_like(perlin_noise),
+    #         np.zeros_like(perlin_noise)
+    #     )
+
+    #     mask_noise = skeletonize(mask_noise).astype(np.float32)
+
+        
+    #     elastic = iaa.ElasticTransformation(alpha=150, sigma=10)  # 弹性变形增加局部弯曲
+    #     mask_noise = elastic(image=mask_noise)
+    #     perlin_noise = closing(perlin_noise, disk(5))
+        
+    #     return mask_noise
+
+    def generate_stringy_noise_mask(self) -> np.ndarray:
+        width, height = 256, 256
+        mask = np.zeros((height, width), dtype=np.uint8)  # 创建一个全黑的图像作为掩码
+        num_lines = np.random.randint(1, 3)  # 使用NumPy随机生成1到3条线
+
+        for _ in range(num_lines):
+            selected = np.random.choice(['line','curve'], p=[0.4, 0.6])
+            if selected == 'line':
+                # 7成粗线，3成细线
+                line_width = np.random.choice([1, np.random.randint(3, 6) ,np.random.randint(30, 50), np.random.randint(100, 150)], p=[0.3, 0.2, 0.4, 0.1])
+                line_length = np.random.choice([np.random.randint(30, 120) ,np.random.randint(200, 255), 255], p=[0.3, 0.3, 0.4])
+                # 90%纵向
+                if np.random.rand() > 0.1:
+                    # 根据概率调整 x_start 的分布
+                    if np.random.rand() < 0.8:  # 80%概率在左右边缘
+                        x_start = np.random.choice([np.random.randint(0, width // 3), np.random.randint(width * 2 // 3, width)])
+                    else:  # 20%概率在中间
+                        x_start = np.random.randint(width // 3, width * 2 // 3)
+                    y_start = np.random.choice([0, random.randint(0, height-line_length)], p=[0.6, 0.4])
+                    if np.random.rand() > 0.5:
+                        slope = np.random.uniform(-20, -5)
+                    else:
+                        slope = np.random.uniform(5, 20)
+                    # slope = np.random.uniform(*np.random.choice([(-20, -10), (10, 20)]))
+                    x_end = x_start + line_length * np.cos(np.arctan(slope))
+                    y_end = y_start + line_length * np.sin(np.arctan(slope))
+                    x = np.linspace(x_start, x_end, line_length).astype(int)
+                    y = np.linspace(y_start, y_end, line_length).astype(int)
+                    valid_mask = (x >= 0) & (x < width) & (y >= 0) & (y < height)
+                    x = x[valid_mask]
+                    y = y[valid_mask]
+                    mask[y, x] = 1
+                    for w in range(1, line_width // 2 + 1):
+                        mask[np.clip(y, 0, height - 1), np.clip(x - w, 0, width - 1)] = 1
+                        mask[np.clip(y, 0, height - 1), np.clip(x + w, 0, width - 1)] = 1
+                else:
+                    x_start = np.random.randint(0, width - line_length)  # 水平方向从边界开始，保证不会越界
+                    if np.random.rand() < 0.8:  # 80%概率在上下边缘
+                        y_start = np.random.choice([np.random.randint(0, height // 3), np.random.randint(height * 2 // 3, height)])
+                    else:  # 20%概率在中间
+                        y_start = np.random.randint(height // 3, height * 2 // 3)
+                    slope = np.random.uniform(-0.3, 0.3)
+                    x_end = x_start + line_length
+                    y_end = y_start + line_length * np.sin(np.arctan(slope))
+                    x = np.linspace(x_start, x_end, line_length).astype(int)
+                    y = np.linspace(y_start, y_end, line_length).astype(int)
+                    valid_mask = (x >= 0) & (x < width) & (y >= 0) & (y < height)
+                    x = x[valid_mask]
+                    y = y[valid_mask]
+                    mask[y, x] = 1
+                    for w in range(1, line_width // 2 + 1):
+                        mask[np.clip(y - w, 0, height - 1), np.clip(x, 0, width - 1)] = 1
+                        mask[np.clip(y + w, 0, height - 1), np.clip(x, 0, width - 1)] = 1
+
+            else:
+                # 4成粗线，6成细线
+                line_width = np.random.choice([1, np.random.randint(3, 6) ,np.random.randint(8, 16)], p=[0.6, 0.2, 0.2])
+                line_length = torch.randint(30, 150, (1,)).numpy()[0]
+                if np.random.rand() > 0.1:
+                    start_y = np.random.choice([0, random.randint(0, height-line_length)], p=[0.6, 0.4])
+
+                    amplitude = np.random.uniform(60, 80)
+                    frequency1 = np.random.uniform(0.01, 0.03)
+                    frequency2 = np.random.uniform(0.004, 0.01)
+                    frequency3 = np.random.uniform(0.002, 0.004)
+                    phase_shift1 = np.random.uniform(0, 2 * np.pi)
+                    phase_shift2 = np.random.uniform(0, 2 * np.pi)
+                    phase_shift3 = np.random.uniform(0, 2 * np.pi)
+                    y = np.linspace(start_y, start_y + line_length, 500)
+                    x1 = amplitude * np.sin(frequency1 * y + phase_shift1)
+                    x2 = (amplitude * 2) * np.sin(frequency2 * y + phase_shift2)
+                    x3 = (amplitude * 4) * np.sin(frequency3 * y + phase_shift3)
+                    x = width // 2 + (x1 + x2 + x3) / 3
+                    xi = np.clip(x.astype(int), 0, width - 1)
+                    yi = np.clip(y.astype(int), 0, height - 1)
+
+                    mask[yi, xi] = 1
+                    for w in range(1, line_width // 2):
+                        mask[yi, np.clip(xi - w, 0, width - 1)] = 1
+                        mask[yi, np.clip(xi + w, 0, width - 1)] = 1
+                    mask = self.elastic(image=mask)
+
+                else:
+                    start_x = torch.randint(0, width - line_length + 1, (1,)).numpy()[0]  # 横向起点
+                    amplitude = np.random.uniform(60, 80)  # 正弦波的振幅
+
+                    frequency1 = np.random.uniform(0.01, 0.03)
+                    frequency2 = np.random.uniform(0.004, 0.01)
+                    frequency3 = np.random.uniform(0.002, 0.004)
+                    phase_shift1 = np.random.uniform(0, 2 * np.pi)
+                    phase_shift2 = np.random.uniform(0, 2 * np.pi)
+                    phase_shift3 = np.random.uniform(0, 2 * np.pi)
+
+                    x = np.linspace(start_x, start_x + line_length, 500)
+
+                    y1 = amplitude * np.sin(frequency1 * x + phase_shift1)
+                    y2 = (amplitude * 2) * np.sin(frequency2 * x + phase_shift2)
+                    y3 = (amplitude * 4) * np.sin(frequency3 * x + phase_shift3)
+                    y = height // 2 + (y1 + y2 + y3) / 3
+
+                    xi = np.clip(x.astype(int), 0, width - 1)
+                    yi = np.clip(y.astype(int), 0, height - 1)
+
+                    mask[yi, xi] = 1
+                    for w in range(1, line_width // 2):
+                        mask[np.clip(yi - w, 0, height - 1), xi] = 1
+                        mask[np.clip(yi + w, 0, height - 1), xi] = 1
+                    mask = self.elastic(image=mask)
+                        
+
+
+        return mask
+
+
 
     def rand_augment(self):
         augmenters = [
@@ -389,6 +607,8 @@ class RealNetDataset(BaseDataset):
             augmenters[aug_idx[2]]
         ])
         return aug
+
+
 
     def anomaly_source(self, img: np.ndarray,
                              mask:np.ndarray,

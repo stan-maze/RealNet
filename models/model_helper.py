@@ -25,7 +25,6 @@ class ModelHelper(nn.Module):
                 prev_module = getattr(self, cfg_subnet["prev"])
                 kwargs["inplanes"] = prev_module.get_outplanes()
                 kwargs["instrides"] = prev_module.get_outstrides()
-
             module = self.build(mtype, kwargs)
             self.add_module(mname, module)
 

@@ -4,8 +4,9 @@ from tqdm import tqdm
 from utils.misc_helper import to_device
 import torch.nn.functional as F
 import torch.distributed as dist
-import copy
-
+import copy, os, cv2
+import numpy as np
+import torchvision.utils as vutils
 
 class AFS(nn.Module):
     def __init__(self,
@@ -106,6 +107,7 @@ class AFS(nn.Module):
             except StopIteration:
                 iterator = iter(train_loader)
                 input = next(iterator)
+        
 
             bb_feats = model.backbone(to_device(input),train=True)
 
@@ -150,6 +152,7 @@ class AFS(nn.Module):
             cri_sum_vec[i][torch.isnan(cri_sum_vec[i])] = torch.max(cri_sum_vec[i][~torch.isnan(cri_sum_vec[i])])
             values, indices = torch.topk(cri_sum_vec[i], k=block['layers'][i]['planes'], dim=-1, largest=False)
             values, _ = torch.sort(indices)
+            # print(values)
 
             if distributed:
                 tensor_list = [values for _ in range(world_size)]
@@ -157,3 +160,97 @@ class AFS(nn.Module):
                 self.indexes["{}_{}".format(block['name'], block['layers'][i]['idx'])].data.copy_(tensor_list[0].long())
             else:
                 self.indexes["{}_{}".format(block['name'], block['layers'][i]['idx'])].data.copy_(values.long())
+    
+
+        # # 可视化残差
+        # for bs_i in tq:
+        #     try:
+        #         input = next(iterator)
+        #     except StopIteration:
+        #         iterator = iter(train_loader)
+        #         input = next(iterator)
+
+        #     # 假设 input['image'] 是包含输入图像的键
+        #     input_images = input['image']  # 形状为 (batch_size, channels, height, width)
+        #     input_masks = input['mask']  # 形状为 (batch_size, channels, height, width)
+        #     save_dir = "residual_images"
+        #     os.makedirs(save_dir, exist_ok=True)
+        #     # 保存每个 batch 中的图像
+        #     for i in range(input_images.size(0)):  # 遍历 batch
+        #         img_tensor = input_images[i]  # 提取第 i 个图像
+        #         mask_tensor = input_masks[i]
+        #         save_path = os.path.join(save_dir, f"input_{bs_i}_{i}.png")
+        #         vutils.save_image(img_tensor, save_path)  # 保存为 PNG 文件
+        #         save_path = os.path.join(save_dir, f"mask_{bs_i}_{i}.png")
+        #         vutils.save_image(mask_tensor, save_path)  # 保存为 PNG 文件
+        #     bb_feats = model.backbone(to_device(input),train=True)
+        #     layer = 1
+        #     self.save_residual_features(bb_feats, output_dir=f"{save_dir}B_128_256_128_64/block{layer}", block_name=f"block{layer}", layer_idx=f'layer{layer}')
+        #     layer = 2
+        #     self.save_residual_features(bb_feats, output_dir=f"{save_dir}B_128_256_128_64/block{layer}", block_name=f"block{layer}", layer_idx=f'layer{layer}')
+        #     layer = 3
+        #     self.save_residual_features(bb_feats, output_dir=f"{save_dir}B_128_256_128_64/block{layer}", block_name=f"block{layer}", layer_idx=f'layer{layer}')
+        #     layer = 4
+        #     self.save_residual_features(bb_feats, output_dir=f"{save_dir}B_128_256_128_64/block{layer}", block_name=f"block{layer}", layer_idx=f'layer{layer}')
+        #     exit()
+
+    
+
+    @torch.no_grad()
+    def save_residual_features(self, inputs, output_dir, block_name=None, layer_idx=None):
+        """
+        根据 self.indexes 挑选的索引保存残差特征为图像.
+        
+        Args:
+            inputs (dict): 包含 'feats' 和 'gt_feats' 的字典.
+            output_dir (str): 保存图像的输出目录.
+            block_name (str, optional): 指定块的名称，如果为 None，则保存所有块的特征.
+            layer_idx (int, optional): 指定层的索引，如果为 None，则保存所有层的特征.
+        """
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        feats = inputs["feats"]
+        gt_feats = inputs["gt_feats"]
+
+        # 遍历结构
+        for block in self.structure:
+            if block_name is not None and block['name'] != block_name:
+                continue  # 跳过非目标块
+
+            print(block['name'])
+            for layer in block['layers']:
+                print(layer)
+                if layer_idx is not None and layer['idx'] != layer_idx:
+                    continue  # 跳过非目标层
+
+                # 从 self.indexes 中获取选中的特征索引
+                selected_idx = self.indexes["{}_{}".format(block['name'], layer['idx'])].data
+                if selected_idx.numel() == 0:
+                    continue  # 如果没有索引，跳过
+
+                # 获取残差特征
+                feat_c = torch.index_select(feats[layer['idx']]['feat'], 1, selected_idx)
+                gt_feat_c = torch.index_select(gt_feats[layer['idx']]['feat'], 1, selected_idx)
+                residual_feat = feat_c - gt_feat_c  # 计算残差
+
+                # 取出批次大小和通道数
+                B, C, H, W = residual_feat.shape
+                residual_feat = residual_feat.cpu().numpy()  # 转换为 NumPy 数组
+
+                # 保存每个通道的残差图像
+                for b in range(B):
+                    for c in range(C):
+                        img = residual_feat[b, c, :, :]
+                        img = (img - img.min()) / (img.max() - img.min()) * 255  # 归一化到 0-255
+                        img = img.astype(np.uint8)  # 转换为 uint8 格式
+
+                        # 构建文件名
+                        file_name = f"{block['name']}_layer{layer['idx']}_batch{b}_channel{c}.png"
+                        file_path = os.path.join(output_dir, file_name)
+
+                        # 保存图片
+                        cv2.imwrite(file_path, img)
+
+                        print(f"Saved: {file_path}")
+

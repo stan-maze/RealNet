@@ -7,6 +7,7 @@ data/MVTec-AD/sia_mvtec_anomaly_images.zip
 data/MVTec-AD/mvte/*
 data/LEISI_V2/*
 data/DTD/*
+data/*
 
 
 # Ignore experiment checkpoints and visualizations
@@ -21,6 +22,14 @@ experiments/MVTec-AD/diffusion_checkpoints/*
 experiments/MVTec-AD/diffusion_vis/*
 experiments/MVTec-AD/realnet_checkpoints/*
 experiments/MVTec-AD/realnet_vis/*
+experiments/
+
 
 # Ignore pretrain directory
 pretrain/*
+
+# 
+residual_images/*
+residual_images_remove_norm/*
+residual_imagesB_128_256_128_64/*
+saved_images/*
